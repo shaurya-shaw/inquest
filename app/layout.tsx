@@ -26,9 +26,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${playfair.variable} ${courier.variable} h-full antialiased dark`}
+      className={`${inter.variable} ${playfair.variable} ${courier.variable} overflow-hidden h-full antialiased dark`}
     >
-      <body className="min-h-full flex flex-col bg-[#050505] text-white font-sans">
+      <body className="h-screen overflow-hidden flex flex-col bg-[#050505] text-white font-sans">
         {children}
       </body>
     </html>

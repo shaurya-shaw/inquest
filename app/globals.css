@@ -6,11 +6,28 @@
 }
 
 body {
-  background-color: #050505;
+  background-color: #000000;
   color: #ededed;
 }
 @keyframes shimmer {
   100% {
     transform: translateX(100%);
   }
+}
+@keyframes bloodFloat {
+  0% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-2px);
+  }
+
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.bloodPool {
+  animation: bloodFloat 6s ease-in-out infinite;
 }
