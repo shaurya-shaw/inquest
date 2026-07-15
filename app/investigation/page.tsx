@@ -46,6 +46,7 @@ export default function InvestigationPage() {
                 head1="CREATE"
                 head2="INVESTIGATION"
                 description="Initialize a multiplayer detective matrix. Compile evidence and collaborate to solve complex case files."
+                path="/investigation/create"
               />
             </div>
             <div className="w-full max-w-105">
@@ -53,6 +54,7 @@ export default function InvestigationPage() {
                 head1="JOIN"
                 head2="INVESTIGATION"
                 description="Access an active crime scene. Sync with other detectives and uncover the truth before the trail goes cold."
+                path="/investigation/join"
               />
             </div>
           </div>

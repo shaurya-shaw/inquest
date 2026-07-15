@@ -1,17 +1,22 @@
+"use client";
 import { CardSpotlight } from "@/components/ui/card-spotlight";
 import { Fingerprint } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 type InvestigationCardProps = {
   head1?: string;
   head2?: string;
   description?: string;
+  path: string;
 };
 
 export default function InvestigationCard({
   head1,
   head2,
   description,
+  path,
 }: InvestigationCardProps) {
+  const router = useRouter();
   return (
     <CardSpotlight className="group relative h-[420px] w-full max-w-[420px] overflow-hidden rounded-2xl border border-red-950/60 bg-black p-8 transition-all duration-500 hover:border-red-800/80 hover:shadow-[0_0_30px_rgba(220,38,38,0.1)]">
       {/* Optional faint background texture for a "screen" effect */}
@@ -70,7 +75,13 @@ export default function InvestigationCard({
         </div>
 
         {/* Action Button */}
-        <button className="relative overflow-hidden rounded-sm border border-red-900 bg-red-950/40 px-5 py-2.5 font-mono text-xs font-bold uppercase tracking-[0.2em] text-red-500 transition-all duration-300 hover:border-red-500 hover:bg-red-900/60 hover:text-white hover:shadow-[0_0_15px_rgba(220,38,38,0.4)] active:scale-95">
+        <button
+          className="relative overflow-hidden rounded-sm border border-red-900 bg-red-950/40 px-5 py-2.5 font-mono text-xs font-bold uppercase tracking-[0.2em] text-red-500 transition-all duration-300 hover:border-red-500 hover:bg-red-900/60 hover:text-white hover:shadow-[0_0_15px_rgba(220,38,38,0.4)] active:scale-95"
+          onClick={() => {
+            // Navigate to the investigation creation page
+            router.push(path);
+          }}
+        >
           <span className="flex items-center gap-2">
             Execute
             <span className="relative flex h-1.5 w-1.5">
