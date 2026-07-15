@@ -1,6 +1,14 @@
-import type { Metadata } from "next";
-import { Inter, Playfair_Display, Courier_Prime } from "next/font/google";
+import {
+  Inter,
+  Playfair_Display,
+  Courier_Prime,
+  Geist,
+} from "next/font/google";
 import "./globals.css";
+import { cn } from "@/lib/utils";
+
+const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
+
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
@@ -14,10 +22,6 @@ const courier = Courier_Prime({
   weight: ["400", "700"],
   subsets: ["latin"],
 });
-export const metadata: Metadata = {
-  title: "Vanishing Evidence",
-  description: "A multiplayer AI murder mystery.",
-};
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -26,9 +30,19 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${playfair.variable} ${courier.variable} overflow-hidden h-full antialiased dark`}
+      className={cn(
+        "min-h-full",
+        "overflow-hidden",
+        "antialiased",
+        "dark",
+        inter.variable,
+        playfair.variable,
+        courier.variable,
+        "font-sans",
+        geist.variable,
+      )}
     >
-      <body className="h-screen overflow-hidden flex flex-col bg-[#050505] text-white font-sans">
+      <body className="min-h-screen overflow-hidden flex flex-col bg-[#050505] text-white font-sans">
         {children}
       </body>
     </html>
