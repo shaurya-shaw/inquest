@@ -1,6 +1,7 @@
 "use client";
-import InvestigationLobby from "@/components/investigation/Lobby";
+import InvestigationLobby from "@/components/lobby/Lobby";
 
+//for now i would use single page for lobby, discussion,investigation,voting, and results.
 export default function InvestigationLobbyPage() {
   return (
     <div className="min-h-screen bg-[#050505] text-[#e8e8e8] font-mono flex items-center justify-center p-6">
