@@ -2,13 +2,18 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown, Paperclip, ScanBarcode } from "lucide-react";
+import { socket } from "@/lib/socket";
+import { useRouter } from "next/navigation";
 
 export default function CreateCaseDossier() {
   const [investigators, setInvestigators] = useState(4);
   const [isClassified, setIsClassified] = useState(false);
   const [isChapterOpen, setIsChapterOpen] = useState(false);
   const [caseChapter, setCaseChapter] = useState("The Last Call");
+  const [detectiveName, setDetectiveName] = useState("");
   const chapterDropdownRef = useRef<HTMLDivElement>(null);
+
+  const router = useRouter();
 
   useEffect(() => {
     const handlePointerDown = (event: MouseEvent) => {
@@ -27,9 +32,24 @@ export default function CreateCaseDossier() {
     };
   }, []);
 
+  useEffect(() => {
+    socket.on("room-created", (data) => {
+      console.log("Room created:", data);
+      setTimeout(() => {
+        router.push(`/investigation/${data.roomId}`);
+      }, 600);
+    });
+
+    return () => {
+      socket.off("room-created");
+    };
+  }, [router]);
+
   const handleCreateCase = () => {
     setIsClassified(true);
+    console.log("clicked");
     // Add logic here to submit the form/navigate after the stamp animation
+    socket.emit("create-room", { name: detectiveName });
   };
 
   return (
@@ -96,7 +116,8 @@ export default function CreateCaseDossier() {
             </label>
             <input
               type="text"
-              defaultValue="Shaurya"
+              value={detectiveName}
+              onChange={(e) => setDetectiveName(e.target.value)}
               className="w-full bg-transparent pb-2 text-lg text-zinc-900 placeholder-zinc-400 border-b-2 border-zinc-800/50 focus:border-zinc-900 focus:outline-none"
             />
           </div>

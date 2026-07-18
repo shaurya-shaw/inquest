@@ -1,14 +1,37 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Archive, ScanBarcode, Fingerprint } from "lucide-react";
+import { socket } from "@/lib/socket";
+import { useRouter } from "next/navigation";
 
 export default function AccessCaseDossier() {
   const [isGranted, setIsGranted] = useState(false);
+  const [detectiveName, setDetectiveName] = useState("");
+  const [accessCode, setAccessCode] = useState("");
+  const router = useRouter();
+
+  useEffect(() => {
+    socket.on("player-joined", (room) => {
+      console.log("Successfully joined room:", room);
+      // Navigate to the lobby or case page here
+      router.push(`/investigation/${room.roomId}`);
+    });
+    socket.on("error", ({ message }) => {
+      console.error("Error joining room:", message);
+      // Handle error (e.g., show a notification to the user)
+    });
+
+    return () => {
+      socket.off("player-joined");
+      socket.off("error");
+    };
+  }, [router]);
 
   const handleAccessCase = () => {
     setIsGranted(true);
     // Add logic here to validate the code and navigate to the lobby
+    socket.emit("join-room", { roomId: accessCode, name: detectiveName });
   };
 
   return (
@@ -73,7 +96,8 @@ export default function AccessCaseDossier() {
             </label>
             <input
               type="text"
-              defaultValue="Shaurya"
+              value={detectiveName}
+              onChange={(e) => setDetectiveName(e.target.value)}
               className="w-full bg-transparent pb-2 text-lg text-zinc-900 placeholder-zinc-400 border-b-2 border-zinc-800/50 focus:border-zinc-900 focus:outline-none"
             />
           </div>
@@ -85,6 +109,8 @@ export default function AccessCaseDossier() {
             <input
               type="text"
               placeholder="ENTER 6-DIGIT CODE"
+              value={accessCode}
+              onChange={(e) => setAccessCode(e.target.value.toUpperCase())}
               className="w-full bg-transparent pb-2 text-lg uppercase tracking-widest text-zinc-900 placeholder-zinc-800/30 border-b-2 border-zinc-800/50 focus:border-zinc-900 focus:outline-none"
               maxLength={6}
             />
