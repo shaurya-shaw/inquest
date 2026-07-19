@@ -14,13 +14,13 @@ export interface Player {
   isHost: boolean;
 }
 
-interface RoomState {
+export interface RoomState {
   roomId: string;
   hostId: string;
   players: Player[];
   phase: RoomPhase;
   caseId: string | null;
-  connected: boolean;
+  maxInvestigators?: number;
   updateRoom: (room: Partial<Omit<RoomState, "updateRoom" | "reset">>) => void;
   reset: () => void;
 }
@@ -31,7 +31,7 @@ const initialState = {
   players: [],
   phase: "LOBBY",
   caseId: null,
-  connected: false,
+  maxInvestigators: undefined,
 } as const satisfies Omit<RoomState, "updateRoom" | "reset">;
 
 export const useRoomStore = create<RoomState>((set) => ({

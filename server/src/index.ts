@@ -3,7 +3,7 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 import { config } from "dotenv";
 import { generateRoomCode } from "./utils.js";
-import { rooms } from "./rooms.js";
+import { rooms, playerRoomMap } from "./rooms.js";
 
 config();
 
@@ -18,19 +18,26 @@ const io = new Server(httpServer, {
 io.on("connection", (socket) => {
   console.log("A user connected:", socket.id);
 
-  socket.on("create-room", ({ name }) => {
+  socket.on("create-room", ({ name, maxInvestigators, caseId }) => {
     const roomId = generateRoomCode();
 
     rooms.set(roomId, {
       roomId,
       hostId: socket.id,
       players: [{ id: socket.id, name, isHost: true }],
+      phase: "LOBBY",
+      caseId: caseId || null,
+      maxInvestigators,
     });
+
+    playerRoomMap.set(socket.id, roomId);
+
+    const room = rooms.get(roomId);
 
     socket.join(roomId);
     console.log(`Room created with ID: ${roomId} by user: ${name}`);
 
-    socket.emit("room-created", { roomId });
+    socket.emit("room-created", room);
   });
   socket.on("join-room", ({ roomId, name }) => {
     const room = rooms.get(roomId);
@@ -38,8 +45,17 @@ io.on("connection", (socket) => {
       socket.emit("error", { message: "Room not found" });
       return;
     }
-    console.log(roomId);
+
+    if (room.players.length >= (room.maxInvestigators || Infinity)) {
+      socket.emit("error", { message: "Room is full" });
+      return;
+    }
+
     room.players.push({ id: socket.id, name, isHost: false });
+
+    playerRoomMap.set(socket.id, roomId);
+
+    console.log(roomId);
     console.log(room.players);
     socket.join(roomId);
     console.log(`User joined room ${roomId}: ${name}`);
@@ -48,35 +64,48 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
-    console.log("A user disconnected:", socket.id);
-    for (const [roomId, room] of rooms) {
-      room.players = room.players.filter((player) => player.id !== socket.id);
+    console.log(`Disconnected: ${socket.id}`);
 
-      // If the host left, end the room
-      if (room.hostId === socket.id) {
-        io.to(roomId).emit("room-closed", {
-          message: "Host disconnected. Investigation terminated.",
-        });
+    const roomId = playerRoomMap.get(socket.id);
 
-        rooms.delete(roomId);
+    if (!roomId) return;
 
-        console.log(`Room ${roomId} deleted (host disconnected)`);
+    const room = rooms.get(roomId);
 
-        continue;
-      }
-
-      if (room.players.length === 0) {
-        console.log(`Room ${roomId} deleted (empty room)`);
-
-        continue;
-      }
-      // Notify remaining players
-      io.to(roomId).emit("room-updated", room);
-
-      console.log(
-        `${socket.id} removed from ${roomId}. Remaining players: ${room.players.length}`,
-      );
+    if (!room) {
+      playerRoomMap.delete(socket.id);
+      return;
     }
+
+    room.players = room.players.filter((player) => player.id !== socket.id);
+
+    playerRoomMap.delete(socket.id);
+
+    // Host disconnected
+    if (room.hostId === socket.id) {
+      io.to(roomId).emit("room-closed", {
+        message: "Host disconnected. Investigation terminated.",
+      });
+
+      rooms.delete(roomId);
+
+      console.log(`Deleted room ${roomId}`);
+
+      return;
+    }
+
+    // Empty room
+    if (room.players.length === 0) {
+      rooms.delete(roomId);
+
+      console.log(`Deleted empty room ${roomId}`);
+
+      return;
+    }
+
+    io.to(roomId).emit("room-updated", room);
+
+    console.log(`Room ${roomId} updated. Players left: ${room.players.length}`);
   });
 });
 

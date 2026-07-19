@@ -1,21 +1,33 @@
 "use client";
 import InvestigationLobby from "@/components/lobby/Lobby";
+import { usePlayerStore } from "@/stores/player-store";
+import { useRoomStore } from "@/stores/room-store";
 
-//for now i would use single page for lobby, discussion,investigation,voting, and results.
-export default function InvestigationLobbyPage() {
-  return (
-    <div className="min-h-screen bg-[#050505] text-[#e8e8e8] font-mono flex items-center justify-center p-6">
-      <InvestigationLobby
-        caseId="A-284"
-        caseTitle="THE BLACKWOOD MANOR MURDER"
-        players={[
-          { id: "1", name: "Shaurya", isHost: true },
-          { id: "2", name: "Rahul" },
-        ]}
-        maxPlayers={4}
-        isHost={true}
-        onStart={() => console.log("Starting investigation...")}
-      />
-    </div>
-  );
+export default function InvestigationRoom() {
+  const { phase, caseId, players, maxInvestigators } = useRoomStore();
+  const { isHost } = usePlayerStore();
+
+  switch (phase) {
+    case "LOBBY":
+      return (
+        <InvestigationLobby
+          caseTitle={caseId ?? "Unknown Case"}
+          players={players}
+          maxPlayers={maxInvestigators}
+          isHost={isHost}
+        />
+      );
+
+    // case "INVESTIGATION":
+    //   return <Investigation />;
+
+    // case "DISCUSSION":
+    //   return <Discussion />;
+
+    // case "VOTING":
+    //   return <Voting />;
+
+    // case "RESULTS":
+    //   return <Results />;
+  }
 }

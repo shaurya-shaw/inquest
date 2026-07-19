@@ -4,8 +4,19 @@ export interface Player {
   isHost: boolean;
 }
 
+type RoomPhase =
+  | "LOBBY"
+  | "INVESTIGATION"
+  | "DISCUSSION"
+  | "VOTING"
+  | "RESULTS"
+  | "CLOSED";
+
 export interface Room {
   roomId: string;
   hostId: string;
   players: Player[];
+  phase: RoomPhase;
+  caseId: string | null;
+  maxInvestigators?: number;
 }

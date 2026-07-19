@@ -4,6 +4,7 @@ interface PlayerState {
   socketId: string;
   detectiveName: string;
   roomId: string;
+  isHost: boolean;
 
   updatePlayer: (
     player: Partial<Omit<PlayerState, "updatePlayer" | "reset">>,
@@ -16,6 +17,7 @@ const initialState = {
   socketId: "",
   detectiveName: "",
   roomId: "",
+  isHost: false,
 };
 
 export const usePlayerStore = create<PlayerState>((set) => ({

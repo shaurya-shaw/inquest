@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { ChevronDown, Paperclip, ScanBarcode } from "lucide-react";
 import { socket } from "@/lib/socket";
 import { useRouter } from "next/navigation";
+import { usePlayerStore } from "@/stores/player-store";
+import { RoomState, useRoomStore } from "@/stores/room-store";
 
 export default function CreateCaseDossier() {
   const [investigators, setInvestigators] = useState(4);
@@ -14,6 +16,8 @@ export default function CreateCaseDossier() {
   const chapterDropdownRef = useRef<HTMLDivElement>(null);
 
   const router = useRouter();
+  const { updatePlayer } = usePlayerStore();
+  const { updateRoom } = useRoomStore();
 
   useEffect(() => {
     const handlePointerDown = (event: MouseEvent) => {
@@ -33,23 +37,37 @@ export default function CreateCaseDossier() {
   }, []);
 
   useEffect(() => {
-    socket.on("room-created", (data) => {
-      console.log("Room created:", data);
+    const handleRoomCreated = (room: RoomState) => {
+      updatePlayer({
+        roomId: room.roomId,
+        detectiveName,
+        socketId: room.hostId,
+        isHost: true,
+      });
+
+      updateRoom(room);
+
       setTimeout(() => {
-        router.push(`/investigation/${data.roomId}`);
+        router.push(`/investigation/${room.roomId}`);
       }, 600);
-    });
+    };
+
+    socket.on("room-created", handleRoomCreated);
 
     return () => {
-      socket.off("room-created");
+      socket.off("room-created", handleRoomCreated);
     };
-  }, [router]);
+  }, [router, detectiveName, updatePlayer]);
 
   const handleCreateCase = () => {
     setIsClassified(true);
     console.log("clicked");
     // Add logic here to submit the form/navigate after the stamp animation
-    socket.emit("create-room", { name: detectiveName });
+    socket.emit("create-room", {
+      name: detectiveName,
+      maxInvestigators: investigators,
+      caseId: caseChapter,
+    });
   };
 
   return (

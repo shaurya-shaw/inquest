@@ -4,19 +4,36 @@ import { useState, useEffect } from "react";
 import { Archive, ScanBarcode, Fingerprint } from "lucide-react";
 import { socket } from "@/lib/socket";
 import { useRouter } from "next/navigation";
+import { RoomState, useRoomStore } from "@/stores/room-store";
+import { usePlayerStore } from "@/stores/player-store";
 
 export default function AccessCaseDossier() {
   const [isGranted, setIsGranted] = useState(false);
   const [detectiveName, setDetectiveName] = useState("");
   const [accessCode, setAccessCode] = useState("");
   const router = useRouter();
+  const { updatePlayer } = usePlayerStore();
+  const { updateRoom } = useRoomStore();
 
   useEffect(() => {
-    socket.on("player-joined", (room) => {
+    const handlePlayerJoined = (room: RoomState) => {
       console.log("Successfully joined room:", room);
-      // Navigate to the lobby or case page here
-      router.push(`/investigation/${room.roomId}`);
-    });
+      updatePlayer({
+        roomId: room.roomId,
+        detectiveName,
+        socketId: room.hostId,
+        isHost: false,
+      });
+
+      updateRoom(room);
+
+      setTimeout(() => {
+        router.push(`/investigation/${room.roomId}`);
+      }, 600);
+    };
+
+    socket.on("player-joined", handlePlayerJoined);
+
     socket.on("error", ({ message }) => {
       console.error("Error joining room:", message);
       // Handle error (e.g., show a notification to the user)
