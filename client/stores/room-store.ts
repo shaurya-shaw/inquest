@@ -22,7 +22,7 @@ export interface RoomState {
   caseId: string | null;
   maxInvestigators?: number;
   updateRoom: (room: Partial<Omit<RoomState, "updateRoom" | "reset">>) => void;
-  reset: () => void;
+  resetRoom: () => void;
 }
 
 const initialState = {
@@ -32,10 +32,10 @@ const initialState = {
   phase: "LOBBY",
   caseId: null,
   maxInvestigators: undefined,
-} as const satisfies Omit<RoomState, "updateRoom" | "reset">;
+} as const satisfies Omit<RoomState, "updateRoom" | "resetRoom">;
 
 export const useRoomStore = create<RoomState>((set) => ({
   ...initialState,
   updateRoom: (room) => set((state) => ({ ...state, ...room })),
-  reset: () => set(initialState),
+  resetRoom: () => set(initialState),
 }));

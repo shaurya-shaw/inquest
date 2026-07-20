@@ -136,7 +136,8 @@ io.on("connection", (socket) => {
     // Host left -> close room
     if (room.hostId === socket.id) {
       io.to(roomId).emit("room-closed", {
-        message: "Host left the investigation.",
+        message: `🚨 Investigation Terminated 
+        The Lead Investigator has abandoned the case. All detectives have been dismissed.`,
       });
 
       rooms.delete(roomId);

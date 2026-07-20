@@ -10,7 +10,7 @@ interface PlayerState {
     player: Partial<Omit<PlayerState, "updatePlayer" | "reset">>,
   ) => void;
 
-  reset: () => void;
+  resetPlayer: () => void;
 }
 
 const initialState = {
@@ -29,5 +29,5 @@ export const usePlayerStore = create<PlayerState>((set) => ({
       ...player,
     })),
 
-  reset: () => set(initialState),
+  resetPlayer: () => set(initialState),
 }));

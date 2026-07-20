@@ -6,6 +6,7 @@ import {
 } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
+import { Toaster } from "sonner";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -44,6 +45,7 @@ export default function RootLayout({
     >
       <body className="min-h-screen overflow-hidden flex flex-col bg-[#050505] text-white font-sans">
         {children}
+        <Toaster richColors position="top-right" />
       </body>
     </html>
   );
