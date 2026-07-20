@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 
 interface Player {
@@ -38,7 +39,7 @@ const lineVariants = {
 };
 
 export default function InvestigationLobby({
-  caseId = "A-284",
+  caseId,
   caseTitle = "THE BLACKWOOD MANOR MURDER",
   players = [
     { id: "1", name: "Shaurya", isHost: true },
@@ -50,6 +51,19 @@ export default function InvestigationLobby({
 }: LobbyProps) {
   const emptySlots = maxPlayers - players.length;
   const canStart = isHost && players.length >= 2;
+
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyRoomId = async () => {
+    if (!caseId) return;
+    try {
+      await navigator.clipboard.writeText(caseId);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy room ID", err);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-black text-[#e8e8e8] font-mono p-6 md:p-7 selection:bg-red-900 selection:text-white">
@@ -86,11 +100,30 @@ export default function InvestigationLobby({
           <div className="text-red-600 font-bold tracking-[0.4em] text-xs mb-3">
             :: CLASSIFIED OPERATION ::
           </div>
-          <h1 className="text-2xl sm:text-4xl text-white tracking-widest uppercase mb-2">
+          <h1 className="text-2xl sm:text-4xl text-white tracking-widest uppercase mb-4">
             {caseTitle}
           </h1>
-          <div className="text-neutral-500 text-sm tracking-widest uppercase">
-            FILE.REF // {caseId}
+
+          {/* ROOM ID - prominently displayed with copy */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 mt-2">
+            <span className="text-neutral-500 text-sm tracking-widest uppercase shrink-0">
+              ROOM_ID //
+            </span>
+            <div className="flex rounded-md items-center border border-neutral-600 bg-neutral-950 px-3 py-2 gap-3 max-w-full">
+              <span className="text-white font-mono text-base sm:text-lg tracking-[0.15em] select-all truncate">
+                {caseId || "----------"}
+              </span>
+              <button
+                onClick={handleCopyRoomId}
+                disabled={!caseId}
+                className="shrink-0 text-xs uppercase tracking-wider px-2 py-1 border border-neutral-700 text-neutral-400 hover:text-white hover:border-neutral-500 hover:bg-neutral-900 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {copied ? "[ COPIED ]" : "[ COPY ]"}
+              </button>
+            </div>
+          </div>
+          <div className="text-neutral-600 text-xs tracking-widest uppercase mt-2">
+            SHARE THIS CODE WITH YOUR TEAM TO JOIN
           </div>
         </motion.div>
 
@@ -163,7 +196,7 @@ export default function InvestigationLobby({
               className="flex justify-between border-b border-neutral-900 pb-2"
             >
               <span className="text-neutral-500">EST_DURATION</span>
-              <span className="text-white">~30 MIN</span>
+              <span className="text-white">~15 MIN</span>
             </motion.div>
             <motion.div
               variants={lineVariants}

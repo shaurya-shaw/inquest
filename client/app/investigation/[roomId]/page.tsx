@@ -6,7 +6,7 @@ import { useRoomStore } from "@/stores/room-store";
 import { useEffect } from "react";
 
 export default function InvestigationRoom() {
-  const { phase, caseId, players, maxInvestigators, updateRoom } =
+  const { phase, caseId, players, maxInvestigators, updateRoom, roomId } =
     useRoomStore();
   const { isHost } = usePlayerStore();
 
@@ -29,6 +29,7 @@ export default function InvestigationRoom() {
           players={players}
           maxPlayers={maxInvestigators}
           isHost={isHost}
+          caseId={roomId}
         />
       );
 
