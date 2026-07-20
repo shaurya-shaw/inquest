@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
+import AbortOperationBtn from "./Abort_operationBtn";
 
 interface Player {
   id: string;
@@ -66,15 +67,18 @@ export default function InvestigationLobby({
   };
 
   return (
-    <div className="min-h-screen bg-black text-[#e8e8e8] font-mono p-6 md:p-7 selection:bg-red-900 selection:text-white">
+    <div className="relative min-h-screen bg-black text-[#e8e8e8] font-mono p-6 md:p-7 selection:bg-red-900 selection:text-white">
+      {/* Leave Button */}
+      <AbortOperationBtn />
+
       <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="show"
-        className="max-w-4xl mx-auto flex flex-col gap-8"
+        className="max-w-4xl mx-auto flex flex-col gap-8 pt-10 sm:pt-0"
       >
         {/* Boot Sequence Log */}
-        <div className="flex flex-col gap-1 text-neutral-500 text-xs sm:text-sm uppercase tracking-widest">
+        <div className="flex flex-col gap-1 text-neutral-500 text-xs sm:text-sm uppercase tracking-widest mt-8 sm:mt-0">
           <motion.div variants={lineVariants}>
             $ system_boot --secure
           </motion.div>

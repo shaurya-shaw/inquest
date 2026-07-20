@@ -16,8 +16,14 @@ export default function InvestigationRoom() {
       console.log("Room updated:", room);
     });
 
+    //TODO: Handle room closure when the host leaves
+    // socket.on("room-closed", () => {
+    //   toast.error("The host has left the room. You will be redirected to the home page.");
+    // });
+
     return () => {
       socket.off("room-updated");
+      socket.off("room-closed");
     };
   }, [updateRoom]);
 

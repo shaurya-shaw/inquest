@@ -107,6 +107,66 @@ io.on("connection", (socket) => {
 
     console.log(`Room ${roomId} updated. Players left: ${room.players.length}`);
   });
+  socket.on("leave-room", () => {
+    const roomId = playerRoomMap.get(socket.id);
+
+    if (!roomId) {
+      socket.emit("error", {
+        message: "You are not in any room.",
+      });
+      return;
+    }
+
+    const room = rooms.get(roomId);
+
+    if (!room) {
+      playerRoomMap.delete(socket.id);
+      return;
+    }
+
+    // Remove player
+    room.players = room.players.filter((player) => player.id !== socket.id);
+
+    // Remove lookup
+    playerRoomMap.delete(socket.id);
+
+    // Leave Socket.IO room
+    socket.leave(roomId);
+
+    // Host left -> close room
+    if (room.hostId === socket.id) {
+      io.to(roomId).emit("room-closed", {
+        message: "Host left the investigation.",
+      });
+
+      rooms.delete(roomId);
+
+      socket.emit("left-room");
+
+      console.log(`Room ${roomId} deleted (host left)`);
+
+      return;
+    }
+
+    // No players left
+    if (room.players.length === 0) {
+      rooms.delete(roomId);
+
+      socket.emit("left-room");
+
+      console.log(`Room ${roomId} deleted (empty)`);
+
+      return;
+    }
+
+    // Update remaining players
+    io.to(roomId).emit("room-updated", room);
+
+    // Tell this player they successfully left
+    socket.emit("left-room");
+
+    console.log(`${socket.id} left room ${roomId}`);
+  });
 });
 
 httpServer.listen(process.env.PORT || 5000, () => {
