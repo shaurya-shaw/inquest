@@ -1,11 +1,25 @@
 "use client";
 import InvestigationLobby from "@/components/lobby/Lobby";
+import { socket } from "@/lib/socket";
 import { usePlayerStore } from "@/stores/player-store";
 import { useRoomStore } from "@/stores/room-store";
+import { useEffect } from "react";
 
 export default function InvestigationRoom() {
-  const { phase, caseId, players, maxInvestigators } = useRoomStore();
+  const { phase, caseId, players, maxInvestigators, updateRoom } =
+    useRoomStore();
   const { isHost } = usePlayerStore();
+
+  useEffect(() => {
+    socket.on("room-updated", (room) => {
+      updateRoom(room);
+      console.log("Room updated:", room);
+    });
+
+    return () => {
+      socket.off("room-updated");
+    };
+  }, [updateRoom]);
 
   switch (phase) {
     case "LOBBY":

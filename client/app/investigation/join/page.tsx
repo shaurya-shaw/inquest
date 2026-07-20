@@ -32,7 +32,7 @@ export default function AccessCaseDossier() {
       }, 600);
     };
 
-    socket.on("player-joined", handlePlayerJoined);
+    socket.on("room-updated", handlePlayerJoined);
 
     socket.on("error", ({ message }) => {
       console.error("Error joining room:", message);
@@ -40,7 +40,7 @@ export default function AccessCaseDossier() {
     });
 
     return () => {
-      socket.off("player-joined");
+      socket.off("room-updated");
       socket.off("error");
     };
   }, [router]);

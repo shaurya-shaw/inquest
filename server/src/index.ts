@@ -60,7 +60,7 @@ io.on("connection", (socket) => {
     socket.join(roomId);
     console.log(`User joined room ${roomId}: ${name}`);
 
-    io.to(roomId).emit("player-joined", room);
+    io.to(roomId).emit("room-updated", room);
   });
 
   socket.on("disconnect", () => {
