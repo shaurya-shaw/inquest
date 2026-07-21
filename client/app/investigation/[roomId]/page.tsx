@@ -6,6 +6,7 @@ import { type RoomState, useRoomStore } from "@/stores/room-store";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useParams, useRouter } from "next/navigation";
+import InvestigationPage from "@/components/investigation/InvestigationPage";
 
 export default function InvestigationRoom() {
   const {
@@ -109,8 +110,8 @@ export default function InvestigationRoom() {
         />
       );
 
-    // case "INVESTIGATION":
-    //   return <Investigation />;
+    case "INVESTIGATION":
+      return <InvestigationPage />;
 
     // case "DISCUSSION":
     //   return <Discussion />;

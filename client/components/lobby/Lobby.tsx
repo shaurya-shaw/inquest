@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import AbortOperationBtn from "./Abort_operationBtn";
+import StartInvestigationBtn from "./StartInvestgationBtn";
 
 interface Player {
   playerId: string;
@@ -16,7 +17,6 @@ interface LobbyProps {
   players?: Player[];
   maxPlayers?: number;
   isHost?: boolean;
-  onStart?: () => void;
 }
 
 const containerVariants = {
@@ -48,7 +48,6 @@ export default function InvestigationLobby({
   ],
   maxPlayers = 4,
   isHost = true,
-  onStart,
 }: LobbyProps) {
   const emptySlots = maxPlayers - players.length;
   const canStart = isHost && players.length >= 2;
@@ -223,18 +222,7 @@ export default function InvestigationLobby({
         <motion.div variants={lineVariants} className="mt-12">
           {isHost ? (
             canStart ? (
-              <button
-                onClick={onStart}
-                className="group w-full md:w-auto flex items-center border border-neutral-700 p-4 hover:bg-white hover:text-black transition-none focus:outline-none"
-              >
-                <span className="text-red-600 mr-4 group-hover:text-black font-bold">
-                  {">"}
-                </span>
-                <span className="uppercase tracking-[0.2em] font-bold">
-                  [ START_INVESTIGATION ]
-                </span>
-                <span className="ml-4 w-3 h-5 bg-white group-hover:bg-black block animate-pulse" />
-              </button>
+              <StartInvestigationBtn />
             ) : (
               <div className="w-full md:w-auto inline-flex items-center border border-neutral-900 p-4 text-neutral-600 cursor-not-allowed">
                 <span className="mr-4 font-bold">{">"}</span>

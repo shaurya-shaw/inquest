@@ -36,5 +36,5 @@ export interface PublicRoom {
   players: PublicPlayer[];
   phase: RoomPhase;
   caseId: string | null;
-  maxInvestigators?: number;
+  maxInvestigators?: number | undefined;
 }

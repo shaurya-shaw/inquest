@@ -370,6 +370,39 @@ io.on("connection", (socket) => {
 
     console.log(`${socket.id} left room ${roomId}`);
   });
+  socket.on("start-investigation", () => {
+    const membership = socketMemberships.get(socket.id);
+    const roomId = membership?.roomId;
+    const playerId = membership?.playerId;
+
+    if (!roomId || !playerId) {
+      socket.emit("error", {
+        message: "You are not in any room.",
+      });
+      return;
+    }
+
+    const room = rooms.get(roomId);
+
+    if (!room) {
+      socket.emit("error", {
+        message: "Room not found.",
+      });
+      return;
+    }
+
+    if (room.hostId !== playerId) {
+      socket.emit("error", {
+        message: "Only the host can start the investigation.",
+      });
+      return;
+    }
+    room.phase = "INVESTIGATION";
+
+    io.to(roomId).emit("room-updated", serializeRoom(room));
+
+    console.log(`Investigation started in room ${roomId}`);
+  });
 });
 
 httpServer.listen(process.env.PORT || 5000, () => {

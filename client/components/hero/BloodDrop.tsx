@@ -3,16 +3,6 @@
 import { motion } from "framer-motion";
 
 export default function BloodDrop() {
-  // KEY INSIGHT: the "reappear with changed dimension" bug is caused by
-  // repeatDelay + repeat: Infinity. At the end of each cycle framer-motion
-  // holds the final keyframe state (opacity 0, y "52vh", scaleX 1.6, scaleY 0.3),
-  // then on the next loop START it snaps back to `initial` values.
-  // That one-frame snap renders with mismatched scale — the visible glitch.
-  //
-  // FIX: embed the invisible reset directly inside the keyframe timeline as the
-  // last segment (opacity stays 0 the whole time while y/scale snap back to
-  // their starting values). The loop end === loop start → zero-glitch seamless repeat.
-
   return (
     <motion.img
       src="/BloodDrop.png"
@@ -44,8 +34,8 @@ export default function BloodDrop() {
       transition={{
         duration: 3.2,
         repeat: Infinity,
-        ease: "linear",   // single linear ease = no speed changes at all
-        times: [0, 0.18, 0.20, 0.80, 0.84, 0.88, 0.89, 1.0],
+        ease: "linear", // single linear ease = no speed changes at all
+        times: [0, 0.18, 0.2, 0.8, 0.84, 0.88, 0.89, 1.0],
       }}
     />
   );
