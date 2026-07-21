@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import AbortOperationBtn from "./Abort_operationBtn";
 
 interface Player {
-  id: string;
+  playerId: string;
   name: string;
   isHost?: boolean;
 }
@@ -35,7 +35,7 @@ const lineVariants = {
   show: {
     opacity: 1,
     x: 0,
-    transition: { ease: "linear", duration: 0.1 },
+    transition: { ease: "linear" as const, duration: 0.1 },
   },
 };
 
@@ -43,8 +43,8 @@ export default function InvestigationLobby({
   caseId,
   caseTitle = "THE BLACKWOOD MANOR MURDER",
   players = [
-    { id: "1", name: "Shaurya", isHost: true },
-    { id: "2", name: "Rahul" },
+    { playerId: "1", name: "Shaurya", isHost: true },
+    { playerId: "2", name: "Rahul" },
   ],
   maxPlayers = 4,
   isHost = true,
@@ -148,7 +148,7 @@ export default function InvestigationLobby({
             {players.map((player, index) => (
               <motion.div
                 variants={lineVariants}
-                key={player.id}
+                key={player.playerId}
                 className="flex items-center text-white"
               >
                 <span className="text-neutral-500 mr-4">

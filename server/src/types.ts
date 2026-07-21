@@ -1,7 +1,16 @@
 export interface Player {
-  id: string;
+  playerId: string;
+  socketId: string;
   name: string;
   isHost: boolean;
+  connected: boolean;
+}
+
+export interface PublicPlayer {
+  playerId: string;
+  name: string;
+  isHost: boolean;
+  connected: boolean;
 }
 
 type RoomPhase =
@@ -16,6 +25,15 @@ export interface Room {
   roomId: string;
   hostId: string;
   players: Player[];
+  phase: RoomPhase;
+  caseId: string | null;
+  maxInvestigators?: number;
+}
+
+export interface PublicRoom {
+  roomId: string;
+  hostId: string;
+  players: PublicPlayer[];
   phase: RoomPhase;
   caseId: string | null;
   maxInvestigators?: number;

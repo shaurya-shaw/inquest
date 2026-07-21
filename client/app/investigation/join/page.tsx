@@ -12,7 +12,7 @@ export default function AccessCaseDossier() {
   const [detectiveName, setDetectiveName] = useState("");
   const [accessCode, setAccessCode] = useState("");
   const router = useRouter();
-  const { updatePlayer } = usePlayerStore();
+  const { playerId, updatePlayer } = usePlayerStore();
   const { updateRoom } = useRoomStore();
 
   useEffect(() => {
@@ -21,7 +21,7 @@ export default function AccessCaseDossier() {
       updatePlayer({
         roomId: room.roomId,
         detectiveName,
-        socketId: room.hostId,
+        playerId,
         isHost: false,
       });
 
@@ -43,12 +43,16 @@ export default function AccessCaseDossier() {
       socket.off("room-updated");
       socket.off("error");
     };
-  }, [router]);
+  }, [router, detectiveName, playerId, updatePlayer, updateRoom]);
 
   const handleAccessCase = () => {
     setIsGranted(true);
     // Add logic here to validate the code and navigate to the lobby
-    socket.emit("join-room", { roomId: accessCode, name: detectiveName });
+    socket.emit("join-room", {
+      roomId: accessCode,
+      name: detectiveName,
+      playerId,
+    });
   };
 
   return (

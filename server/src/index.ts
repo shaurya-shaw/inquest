@@ -1,11 +1,175 @@
 import express from "express";
 import { createServer } from "http";
-import { Server } from "socket.io";
+import { Server, type Socket } from "socket.io";
 import { config } from "dotenv";
 import { generateRoomCode } from "./utils.js";
 import { rooms, playerRoomMap } from "./rooms.js";
+import type { PublicRoom, Room } from "./types.js";
 
 config();
+
+const DISCONNECT_GRACE_MS = 10_000;
+const disconnectTimers = new Map<string, ReturnType<typeof setTimeout>>();
+
+type SocketMembership = {
+  roomId: string;
+  playerId: string;
+};
+
+const socketMemberships = new Map<string, SocketMembership>();
+
+function getDisconnectKey(roomId: string, playerId: string) {
+  return `${roomId}:${playerId}`;
+}
+
+function serializeRoom(room: Room): PublicRoom {
+  return {
+    roomId: room.roomId,
+    hostId: room.hostId,
+    players: room.players.map(({ playerId, name, isHost, connected }) => ({
+      playerId,
+      name,
+      isHost,
+      connected,
+    })),
+    phase: room.phase,
+    caseId: room.caseId,
+    maxInvestigators: room.maxInvestigators,
+  };
+}
+
+function clearDisconnectTimer(roomId: string, playerId: string) {
+  const key = getDisconnectKey(roomId, playerId);
+  const timer = disconnectTimers.get(key);
+
+  if (timer) {
+    clearTimeout(timer);
+    disconnectTimers.delete(key);
+  }
+}
+
+function removePlayerFromRoom(roomId: string, playerId: string) {
+  const room = rooms.get(roomId);
+
+  if (!room) {
+    return;
+  }
+
+  room.players = room.players.filter((player) => player.playerId !== playerId);
+}
+
+function attachPlayerToRoom({
+  socket,
+  room,
+  roomId,
+  playerId,
+  name,
+  isHost,
+}: {
+  socket: Socket;
+  room: Room;
+  roomId: string;
+  playerId: string;
+  name?: string;
+  isHost: boolean;
+}) {
+  const existingPlayer = room.players.find(
+    (player) => player.playerId === playerId,
+  );
+
+  if (existingPlayer) {
+    existingPlayer.name = name ?? existingPlayer.name;
+    existingPlayer.isHost = isHost;
+    existingPlayer.socketId = socket.id;
+    existingPlayer.connected = true;
+  } else {
+    room.players.push({
+      playerId,
+      socketId: socket.id,
+      name: name ?? "Unknown Detective",
+      isHost,
+      connected: true,
+    });
+  }
+
+  socketMemberships.set(socket.id, { roomId, playerId });
+  playerRoomMap.set(socket.id, roomId);
+  socket.join(roomId);
+  clearDisconnectTimer(roomId, playerId);
+}
+
+function markPlayerDisconnected(
+  roomId: string,
+  playerId: string,
+  socketId: string,
+) {
+  const room = rooms.get(roomId);
+
+  if (!room) {
+    return;
+  }
+
+  const player = room.players.find((entry) => entry.playerId === playerId);
+
+  if (!player || player.socketId !== socketId) {
+    return;
+  }
+
+  player.connected = false;
+
+  const key = getDisconnectKey(roomId, playerId);
+  clearDisconnectTimer(roomId, playerId);
+
+  disconnectTimers.set(
+    key,
+    setTimeout(() => {
+      const currentRoom = rooms.get(roomId);
+
+      if (!currentRoom) {
+        disconnectTimers.delete(key);
+        return;
+      }
+
+      const currentPlayer = currentRoom.players.find(
+        (entry) => entry.playerId === playerId,
+      );
+
+      if (!currentPlayer || currentPlayer.connected) {
+        disconnectTimers.delete(key);
+        return;
+      }
+
+      removePlayerFromRoom(roomId, playerId);
+      disconnectTimers.delete(key);
+
+      if (currentRoom.hostId === playerId) {
+        io.to(roomId).emit("room-closed", {
+          message: "Host disconnected. Investigation terminated.",
+        });
+
+        rooms.delete(roomId);
+
+        console.log(`Deleted room ${roomId} after host grace period expired`);
+
+        return;
+      }
+
+      if (currentRoom.players.length === 0) {
+        rooms.delete(roomId);
+
+        console.log(`Deleted empty room ${roomId}`);
+
+        return;
+      }
+
+      io.to(roomId).emit("room-updated", serializeRoom(currentRoom));
+
+      console.log(
+        `Room ${roomId} updated after disconnect grace period. Players left: ${currentRoom.players.length}`,
+      );
+    }, DISCONNECT_GRACE_MS),
+  );
+}
 
 const app = express();
 const httpServer = createServer(app);
@@ -18,18 +182,27 @@ const io = new Server(httpServer, {
 io.on("connection", (socket) => {
   console.log("A user connected:", socket.id);
 
-  socket.on("create-room", ({ name, maxInvestigators, caseId }) => {
+  socket.on("create-room", ({ name, maxInvestigators, caseId, playerId }) => {
     const roomId = generateRoomCode();
 
     rooms.set(roomId, {
       roomId,
-      hostId: socket.id,
-      players: [{ id: socket.id, name, isHost: true }],
+      hostId: playerId,
+      players: [
+        {
+          playerId,
+          socketId: socket.id,
+          name,
+          isHost: true,
+          connected: true,
+        },
+      ],
       phase: "LOBBY",
       caseId: caseId || null,
       maxInvestigators,
     });
 
+    socketMemberships.set(socket.id, { roomId, playerId });
     playerRoomMap.set(socket.id, roomId);
 
     const room = rooms.get(roomId);
@@ -37,38 +210,81 @@ io.on("connection", (socket) => {
     socket.join(roomId);
     console.log(`Room created with ID: ${roomId} by user: ${name}`);
 
-    socket.emit("room-created", room);
+    socket.emit("room-created", serializeRoom(room!));
   });
-  socket.on("join-room", ({ roomId, name }) => {
+
+  socket.on("join-room", ({ roomId, name, playerId }) => {
     const room = rooms.get(roomId);
     if (!room) {
       socket.emit("error", { message: "Room not found" });
       return;
     }
 
-    if (room.players.length >= (room.maxInvestigators || Infinity)) {
+    const existingPlayer = room.players.find(
+      (player) => player.playerId === playerId,
+    );
+
+    if (
+      !existingPlayer &&
+      room.players.length >= (room.maxInvestigators || Infinity)
+    ) {
       socket.emit("error", { message: "Room is full" });
       return;
     }
 
-    room.players.push({ id: socket.id, name, isHost: false });
+    attachPlayerToRoom({
+      socket,
+      room,
+      roomId,
+      playerId,
+      name,
+      isHost: false,
+    });
 
-    playerRoomMap.set(socket.id, roomId);
-
-    console.log(roomId);
-    console.log(room.players);
-    socket.join(roomId);
     console.log(`User joined room ${roomId}: ${name}`);
 
-    io.to(roomId).emit("room-updated", room);
+    io.to(roomId).emit("room-updated", serializeRoom(room));
+  });
+
+  socket.on("rejoin-room", ({ roomId, playerId }) => {
+    const room = rooms.get(roomId);
+
+    if (!room) {
+      socket.emit("error", { message: "Room not found" });
+      return;
+    }
+
+    const player = room.players.find((entry) => entry.playerId === playerId);
+
+    if (!player) {
+      socket.emit("error", { message: "Player not found in room" });
+      return;
+    }
+
+    attachPlayerToRoom({
+      socket,
+      room,
+      roomId,
+      playerId,
+      name: player.name,
+      isHost: player.isHost,
+    });
+
+    console.log(`User rejoined room ${roomId}: ${player.name}`);
+
+    io.to(roomId).emit("room-updated", serializeRoom(room));
   });
 
   socket.on("disconnect", () => {
     console.log(`Disconnected: ${socket.id}`);
 
-    const roomId = playerRoomMap.get(socket.id);
+    const membership = socketMemberships.get(socket.id);
+    const roomId = membership?.roomId;
+    const playerId = membership?.playerId;
 
-    if (!roomId) return;
+    socketMemberships.delete(socket.id);
+
+    if (!roomId || !playerId) return;
 
     const room = rooms.get(roomId);
 
@@ -77,40 +293,24 @@ io.on("connection", (socket) => {
       return;
     }
 
-    room.players = room.players.filter((player) => player.id !== socket.id);
-
     playerRoomMap.delete(socket.id);
 
-    // Host disconnected
-    if (room.hostId === socket.id) {
-      io.to(roomId).emit("room-closed", {
-        message: "Host disconnected. Investigation terminated.",
-      });
+    markPlayerDisconnected(roomId, playerId, socket.id);
 
-      rooms.delete(roomId);
+    const updatedRoom = rooms.get(roomId);
 
-      console.log(`Deleted room ${roomId}`);
-
-      return;
+    if (updatedRoom) {
+      io.to(roomId).emit("room-updated", serializeRoom(updatedRoom));
+      console.log(`Room ${roomId} marked disconnected for player ${playerId}`);
     }
-
-    // Empty room
-    if (room.players.length === 0) {
-      rooms.delete(roomId);
-
-      console.log(`Deleted empty room ${roomId}`);
-
-      return;
-    }
-
-    io.to(roomId).emit("room-updated", room);
-
-    console.log(`Room ${roomId} updated. Players left: ${room.players.length}`);
   });
-  socket.on("leave-room", () => {
-    const roomId = playerRoomMap.get(socket.id);
 
-    if (!roomId) {
+  socket.on("leave-room", () => {
+    const membership = socketMemberships.get(socket.id);
+    const roomId = membership?.roomId;
+    const playerId = membership?.playerId;
+
+    if (!roomId || !playerId) {
       socket.emit("error", {
         message: "You are not in any room.",
       });
@@ -120,21 +320,23 @@ io.on("connection", (socket) => {
     const room = rooms.get(roomId);
 
     if (!room) {
+      socketMemberships.delete(socket.id);
       playerRoomMap.delete(socket.id);
       return;
     }
 
-    // Remove player
-    room.players = room.players.filter((player) => player.id !== socket.id);
+    clearDisconnectTimer(roomId, playerId);
+    removePlayerFromRoom(roomId, playerId);
 
     // Remove lookup
+    socketMemberships.delete(socket.id);
     playerRoomMap.delete(socket.id);
 
     // Leave Socket.IO room
     socket.leave(roomId);
 
     // Host left -> close room
-    if (room.hostId === socket.id) {
+    if (room.hostId === playerId) {
       io.to(roomId).emit("room-closed", {
         message: `🚨 Investigation Terminated 
         The Lead Investigator has abandoned the case. All detectives have been dismissed.`,
@@ -161,7 +363,7 @@ io.on("connection", (socket) => {
     }
 
     // Update remaining players
-    io.to(roomId).emit("room-updated", room);
+    io.to(roomId).emit("room-updated", serializeRoom(room));
 
     // Tell this player they successfully left
     socket.emit("left-room");

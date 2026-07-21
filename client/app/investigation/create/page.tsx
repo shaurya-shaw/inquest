@@ -16,7 +16,7 @@ export default function CreateCaseDossier() {
   const chapterDropdownRef = useRef<HTMLDivElement>(null);
 
   const router = useRouter();
-  const { updatePlayer } = usePlayerStore();
+  const { playerId, updatePlayer } = usePlayerStore();
   const { updateRoom } = useRoomStore();
 
   useEffect(() => {
@@ -41,7 +41,7 @@ export default function CreateCaseDossier() {
       updatePlayer({
         roomId: room.roomId,
         detectiveName,
-        socketId: room.hostId,
+        playerId,
         isHost: true,
       });
 
@@ -57,7 +57,7 @@ export default function CreateCaseDossier() {
     return () => {
       socket.off("room-created", handleRoomCreated);
     };
-  }, [router, detectiveName, updatePlayer]);
+  }, [router, detectiveName, playerId, updatePlayer, updateRoom]);
 
   const handleCreateCase = () => {
     setIsClassified(true);
@@ -67,6 +67,7 @@ export default function CreateCaseDossier() {
       name: detectiveName,
       maxInvestigators: investigators,
       caseId: caseChapter,
+      playerId,
     });
   };
 
@@ -120,8 +121,8 @@ export default function CreateCaseDossier() {
             Create Investigation
           </h1>
           <p className="mx-auto mt-4 max-w-sm font-mono text-sm leading-relaxed text-zinc-700">
-            "Assemble your investigation team and uncover the truth by
-            interrogating suspects."
+            &quot;Assemble your investigation team and uncover the truth by
+            interrogating suspects.&quot;
           </p>
         </div>
 

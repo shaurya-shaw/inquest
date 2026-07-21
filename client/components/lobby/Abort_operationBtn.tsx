@@ -2,21 +2,29 @@
 import { useRouter } from "next/navigation";
 
 import { socket } from "@/lib/socket";
+import { usePlayerStore } from "@/stores/player-store";
+import { useRoomStore } from "@/stores/room-store";
 import { motion } from "motion/react";
 import { useEffect } from "react";
 
 export default function AbortOperationBtn() {
   const router = useRouter();
+  const { resetPlayer } = usePlayerStore();
+  const { resetRoom } = useRoomStore();
 
   useEffect(() => {
-    socket.on("left-room", () => {
+    const handleLeftRoom = () => {
+      resetRoom();
+      resetPlayer();
       router.push("/");
-    });
+    };
+
+    socket.on("left-room", handleLeftRoom);
 
     return () => {
-      socket.off("left-room");
+      socket.off("left-room", handleLeftRoom);
     };
-  }, [router]);
+  }, [resetPlayer, resetRoom, router]);
 
   const handleAbortOperation = () => {
     socket.emit("leave-room");

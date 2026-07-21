@@ -9,9 +9,10 @@ type RoomPhase =
   | "CLOSED";
 
 export interface Player {
-  id: string;
+  playerId: string;
   name: string;
   isHost: boolean;
+  connected?: boolean;
 }
 
 export interface RoomState {
