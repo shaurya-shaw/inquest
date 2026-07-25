@@ -16,6 +16,6 @@ export const useNotebookStore = create<NotebookState>()(
     }),
     {
       name: "inquest-notebook", // localStorage key
-    }
-  )
+    },
+  ),
 );
