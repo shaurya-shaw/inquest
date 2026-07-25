@@ -43,7 +43,7 @@ export default function NarrationControls({
 
   return (
     <div
-      className="fixed inset-x-0 bottom-8 z-50 flex justify-center"
+      className="absolute inset-x-0 bottom-8 z-50 flex justify-center"
       onMouseEnter={() => setVisible(true)}
       onMouseLeave={() => setVisible(true)} // keep visible while hovered
     >

@@ -30,23 +30,26 @@ export default function StoryViewer({
   caseId,
   onComplete,
 }: StoryViewerProps) {
-  // Refs for the active paragraph (auto-scroll target)
+  // Ref for the active paragraph (auto-scroll target)
   const activeParagraphRef = useRef<HTMLDivElement | null>(null);
+  // Ref for the internal scroll container (replaces window scroll)
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
   const handleIndexChange = useCallback((_index: number) => {
     requestAnimationFrame(() => {
       const el = activeParagraphRef.current;
-      if (!el) return;
+      const container = scrollContainerRef.current;
+      if (!el || !container) return;
 
-      // Anchor the top of the active paragraph to 50% of viewport height.
-      // This keeps it comfortably above the fixed narration controls bar
-      // (~80px tall + bottom-8 offset = ~112px from bottom).
+      // Anchor the top of the active paragraph to 50% of the container height.
+      // This keeps it comfortably above the narration controls bar.
       const targetFraction = 0.50;
       const rect = el.getBoundingClientRect();
-      const desiredTop = window.innerHeight * targetFraction;
-      const offset = rect.top + window.scrollY - desiredTop;
+      const containerRect = container.getBoundingClientRect();
+      const desiredTop = container.clientHeight * targetFraction;
+      const offset = rect.top - containerRect.top + container.scrollTop - desiredTop;
 
-      window.scrollTo({ top: offset, behavior: "smooth" });
+      container.scrollTo({ top: offset, behavior: "smooth" });
     });
   }, []);
 
@@ -80,7 +83,8 @@ export default function StoryViewer({
   const isIntro = phase === "idle";
 
   return (
-    <div className="relative min-h-screen w-full overflow-hidden bg-[#070707]">
+    // h-full + flex-col: fills the parent column exactly, no window overflow
+    <div className="relative flex h-full flex-col overflow-hidden bg-[#070707]">
       {/* ── Ambient background texture ─────────────────────────────── */}
       <div
         aria-hidden="true"
@@ -90,10 +94,16 @@ export default function StoryViewer({
       {/* ── Case file watermark ────────────────────────────────────── */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute right-6 top-6 font-mono text-[10px] tracking-[0.3em] text-zinc-800 select-none"
+        className="pointer-events-none absolute right-6 top-6 z-20 font-mono text-[10px] tracking-[0.3em] text-zinc-800 select-none"
       >
         {caseId ?? "CLASSIFIED"} // EYES ONLY
       </div>
+
+      {/* ── Top fade gradient — masks scrolled-away text ───────────── */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 z-10 h-28 bg-gradient-to-b from-[#070707] via-[#070707]/70 to-transparent"
+      />
 
       {/* ── INTRO PHASE ────────────────────────────────────────────── */}
       <AnimatePresence>
@@ -107,46 +117,51 @@ export default function StoryViewer({
         )}
       </AnimatePresence>
 
-      {/* ── STORY BODY ─────────────────────────────────────────────── */}
-      <AnimatePresence>
-        {isBodyVisible && (
-          <motion.main
-            key="story-body"
-            id="story-viewer-main"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8 }}
-            className="mx-auto flex min-h-screen max-w-2xl flex-col justify-start px-6 pb-64 pt-20 md:px-10 md:pt-28"
-            aria-live="polite"
-            aria-label="Investigation briefing"
-          >
-            {/* Paragraph index label */}
-            <p className="mb-10 font-mono text-[9px] tracking-[0.3em] text-zinc-600 uppercase select-none">
-              {caseId} &mdash; Briefing in progress
-            </p>
+      {/* ── STORY BODY (internal scroll container) ─────────────────── */}
+      <div
+        ref={scrollContainerRef}
+        className="flex-1 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
+        <AnimatePresence>
+          {isBodyVisible && (
+            <motion.main
+              key="story-body"
+              id="story-viewer-main"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8 }}
+              className="mx-auto flex max-w-2xl flex-col justify-start px-6 pb-52 pt-20 md:px-10 md:pt-28"
+              aria-live="polite"
+              aria-label="Investigation briefing"
+            >
+              {/* Paragraph index label */}
+              <p className="mb-10 font-mono text-[9px] tracking-[0.3em] text-zinc-600 uppercase select-none">
+                {caseId} &mdash; Briefing in progress
+              </p>
 
-            {/* Paragraphs */}
-            {paragraphs.slice(0, revealedCount).map((text, i) => (
-              <StoryParagraph
-                key={i}
-                text={text}
-                paragraphIndex={i}
-                currentIndex={currentIndex}
-                isPaused={isPaused}
-                restartKey={restartKey}
-                onTypewriterComplete={
-                  i === currentIndex ? markTypewriterDone : () => {}
-                }
-                scrollRef={
-                  i === currentIndex
-                    ? (activeParagraphRef as React.RefObject<HTMLDivElement | null>)
-                    : undefined
-                }
-              />
-            ))}
-          </motion.main>
-        )}
-      </AnimatePresence>
+              {/* Paragraphs */}
+              {paragraphs.slice(0, revealedCount).map((text, i) => (
+                <StoryParagraph
+                  key={i}
+                  text={text}
+                  paragraphIndex={i}
+                  currentIndex={currentIndex}
+                  isPaused={isPaused}
+                  restartKey={restartKey}
+                  onTypewriterComplete={
+                    i === currentIndex ? markTypewriterDone : () => {}
+                  }
+                  scrollRef={
+                    i === currentIndex
+                      ? (activeParagraphRef as React.RefObject<HTMLDivElement | null>)
+                      : undefined
+                  }
+                />
+              ))}
+            </motion.main>
+          )}
+        </AnimatePresence>
+      </div>
 
       {/* ── COMPLETE PHASE ─────────────────────────────────────────── */}
       <AnimatePresence>
