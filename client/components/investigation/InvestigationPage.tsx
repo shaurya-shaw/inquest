@@ -3,6 +3,7 @@
 import StoryViewer from "@/components/investigation/StoryViewer/StoryViewer";
 import DetectiveNotebook from "@/components/investigation/Notebook/DetectiveNotebook";
 import NotebookDrawer from "@/components/investigation/Notebook/NotebookDrawer";
+import InvestigationHUD from "@/components/investigation/InvestigationHUD";
 import { storyParagraphs, caseTitle, caseId } from "@/data/story";
 
 export default function InvestigationPage() {
@@ -31,6 +32,9 @@ export default function InvestigationPage() {
 
       {/* ── Mobile: floating button + bottom-sheet drawer ────────────── */}
       <NotebookDrawer />
+
+      {/* ── Investigation HUD (fixed, top-center of viewport) ────────── */}
+      <InvestigationHUD />
     </div>
   );
 }

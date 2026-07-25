@@ -5,11 +5,17 @@ import { config } from "dotenv";
 import { generateRoomCode } from "./utils.js";
 import { rooms, playerRoomMap } from "./rooms.js";
 import type { PublicRoom, Room } from "./types.js";
+import {
+  MAX_INVESTIGATION_TIME,
+  MIN_INVESTIGATION_TIME,
+} from "./investigation-config.js";
 
 config();
 
 const DISCONNECT_GRACE_MS = 10_000;
 const disconnectTimers = new Map<string, ReturnType<typeof setTimeout>>();
+/** Tracks the max-timer setTimeout for each investigation room */
+const investigationTimers = new Map<string, ReturnType<typeof setTimeout>>();
 
 type SocketMembership = {
   roomId: string;
@@ -35,6 +41,9 @@ function serializeRoom(room: Room): PublicRoom {
     phase: room.phase,
     caseId: room.caseId,
     maxInvestigators: room.maxInvestigators,
+    readyPlayers: room.readyPlayers,
+    phaseStartedAt: room.phaseStartedAt,
+    phaseDuration: room.phaseDuration,
   };
 }
 
@@ -200,6 +209,9 @@ io.on("connection", (socket) => {
       phase: "LOBBY",
       caseId: caseId || null,
       maxInvestigators,
+      readyPlayers: [],
+      phaseStartedAt: null,
+      phaseDuration: null,
     });
 
     socketMemberships.set(socket.id, { roomId, playerId });
@@ -397,11 +409,98 @@ io.on("connection", (socket) => {
       });
       return;
     }
+
+    // Initialise investigation phase state
     room.phase = "INVESTIGATION";
+    room.phaseStartedAt = Date.now();
+    room.phaseDuration = MAX_INVESTIGATION_TIME;
+    room.readyPlayers = [];
+
+    // Start the hard max-timer — auto-transition to DISCUSSION when it fires
+    const existingTimer = investigationTimers.get(roomId);
+    if (existingTimer) clearTimeout(existingTimer);
+
+    const maxTimer = setTimeout(() => {
+      const currentRoom = rooms.get(roomId);
+      if (!currentRoom || currentRoom.phase !== "INVESTIGATION") return;
+
+      console.log(`Room ${roomId}: max investigation timer expired — transitioning to DISCUSSION`);
+      currentRoom.phase = "DISCUSSION";
+      currentRoom.readyPlayers = [];
+      investigationTimers.delete(roomId);
+      io.to(roomId).emit("room-updated", serializeRoom(currentRoom));
+    }, MAX_INVESTIGATION_TIME * 1000);
+
+    investigationTimers.set(roomId, maxTimer);
 
     io.to(roomId).emit("room-updated", serializeRoom(room));
-
     console.log(`Investigation started in room ${roomId}`);
+  });
+
+  socket.on("detective-ready", () => {
+    const membership = socketMemberships.get(socket.id);
+    const roomId = membership?.roomId;
+    const playerId = membership?.playerId;
+
+    if (!roomId || !playerId) {
+      socket.emit("error", { message: "You are not in any room." });
+      return;
+    }
+
+    const room = rooms.get(roomId);
+
+    if (!room) {
+      socket.emit("error", { message: "Room not found." });
+      return;
+    }
+
+    if (room.phase !== "INVESTIGATION") {
+      socket.emit("error", { message: "Investigation is not active." });
+      return;
+    }
+
+    // Enforce minimum investigation time
+    const elapsed = room.phaseStartedAt
+      ? (Date.now() - room.phaseStartedAt) / 1000
+      : 0;
+
+    if (elapsed < MIN_INVESTIGATION_TIME) {
+      socket.emit("error", {
+        message: `Investigation minimum time has not elapsed yet. Please wait ${Math.ceil(MIN_INVESTIGATION_TIME - elapsed)} more second(s).`,
+      });
+      return;
+    }
+
+    // Idempotent — prevent duplicate entries
+    if (!room.readyPlayers.includes(playerId)) {
+      room.readyPlayers.push(playerId);
+      console.log(`Room ${roomId}: player ${playerId} is ready (${room.readyPlayers.length}/${room.players.length})`);
+    }
+
+    // Check if every connected player is ready
+    const connectedPlayers = room.players.filter((p) => p.connected);
+    const allReady = connectedPlayers.every((p) =>
+      room.readyPlayers.includes(p.playerId)
+    );
+
+    if (allReady && connectedPlayers.length > 0) {
+      console.log(`Room ${roomId}: all detectives ready — transitioning to DISCUSSION`);
+
+      // Clear the max-timer since we're transitioning early
+      const timer = investigationTimers.get(roomId);
+      if (timer) {
+        clearTimeout(timer);
+        investigationTimers.delete(roomId);
+      }
+
+      room.phase = "DISCUSSION";
+      room.readyPlayers = [];
+      io.to(roomId).emit("room-updated", serializeRoom(room));
+      return;
+    }
+
+    // Not everyone ready yet — broadcast updated ready list
+    io.to(roomId).emit("room-updated", serializeRoom(room));
   });
 });
 
