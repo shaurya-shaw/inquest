@@ -1,8 +1,21 @@
+"use client";
+
+import StoryViewer from "@/components/investigation/StoryViewer/StoryViewer";
+import { storyParagraphs, caseTitle, caseId } from "@/data/story";
+
 export default function InvestigationPage() {
+  const handleBriefingComplete = () => {
+    // TODO: emit socket event or update room store to move to Discussion phase
+    console.log("[InvestigationPage] Briefing complete — ready for discussion");
+  };
+
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold">Investigation</h1>
-      <p>This is the investigation page.</p>
-    </div>
+    <StoryViewer
+      paragraphs={storyParagraphs}
+      caseTitle={caseTitle}
+      caseId={caseId}
+      onComplete={handleBriefingComplete}
+    />
   );
 }
+
