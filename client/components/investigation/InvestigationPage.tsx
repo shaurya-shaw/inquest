@@ -7,10 +7,6 @@ import InvestigationHUD from "@/components/investigation/InvestigationHUD";
 import { storyParagraphs, caseTitle, caseId } from "@/data/story";
 
 export default function InvestigationPage() {
-  const handleBriefingComplete = () => {
-    // TODO: emit socket event or update room store to move to Discussion phase
-    console.log("[InvestigationPage] Briefing complete — ready for discussion");
-  };
 
   return (
     // h-screen + overflow-hidden = window never scrolls; all scrolling is internal
@@ -21,7 +17,6 @@ export default function InvestigationPage() {
           paragraphs={storyParagraphs}
           caseTitle={caseTitle}
           caseId={caseId}
-          onComplete={handleBriefingComplete}
         />
       </div>
 

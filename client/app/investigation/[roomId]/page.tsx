@@ -113,13 +113,26 @@ export default function InvestigationRoom() {
     case "INVESTIGATION":
       return <InvestigationPage />;
 
-    // case "DISCUSSION":
-    //   return <Discussion />;
+    case "DISCUSSION":
+    case "VOTING":
+    case "RESULTS":
+      return (
+        <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-[#070707] font-mono">
+          <div className="h-px w-16 bg-red-800/60" />
+          <p className="text-[9px] uppercase tracking-[0.5em] text-red-700/80">
+            {phase}
+          </p>
+          <h2 className="text-center font-serif text-2xl font-bold text-[#f0ebe3]">
+            Interrogation incoming&hellip;
+          </h2>
+          <p className="text-xs tracking-[0.2em] text-zinc-600 uppercase">
+            This feature is under construction
+          </p>
+          <div className="h-px w-16 bg-red-800/60" />
+        </div>
+      );
 
-    // case "VOTING":
-    //   return <Voting />;
-
-    // case "RESULTS":
-    //   return <Results />;
+    default:
+      return null;
   }
 }

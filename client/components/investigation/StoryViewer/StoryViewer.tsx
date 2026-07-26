@@ -10,8 +10,6 @@ interface StoryViewerProps {
   paragraphs: string[];
   caseTitle: string;
   caseId?: string;
-  /** Called when the "Briefing Complete" screen has shown long enough to transition */
-  onComplete?: () => void;
 }
 
 /**
@@ -28,7 +26,6 @@ export default function StoryViewer({
   paragraphs,
   caseTitle,
   caseId,
-  onComplete,
 }: StoryViewerProps) {
   // Ref for the active paragraph (auto-scroll target)
   const activeParagraphRef = useRef<HTMLDivElement | null>(null);
@@ -68,18 +65,10 @@ export default function StoryViewer({
     markTypewriterDone,
   } = useStoryController({ paragraphs, onIndexChange: handleIndexChange });
 
-  // Auto-trigger complete callback after showing "Briefing Complete" screen
-  useEffect(() => {
-    if (phase !== "complete") return;
-    const id = setTimeout(() => {
-      onComplete?.();
-    }, 4500);
-    return () => clearTimeout(id);
-  }, [phase, onComplete]);
+  // No auto-transition here — the server's main timer is the sole source of truth.
 
   const isPaused = phase === "paused";
-  const isBodyVisible = phase === "playing" || phase === "paused";
-  const isComplete = phase === "complete";
+  const isBodyVisible = phase === "playing" || phase === "paused" || phase === "complete";
   const isIntro = phase === "idle";
 
   return (
@@ -162,11 +151,6 @@ export default function StoryViewer({
           )}
         </AnimatePresence>
       </div>
-
-      {/* ── COMPLETE PHASE ─────────────────────────────────────────── */}
-      <AnimatePresence>
-        {isComplete && <CompleteScreen key="complete" />}
-      </AnimatePresence>
 
       {/* ── NARRATION CONTROLS ─────────────────────────────────────── */}
       <NarrationControls
@@ -256,58 +240,4 @@ function IntroCard({ caseTitle, caseId, onFinished }: IntroCardProps) {
   );
 }
 
-// ─── Complete Screen ─────────────────────────────────────────────────────────
 
-function CompleteScreen() {
-  return (
-    <motion.div
-      className="fixed inset-0 z-40 flex flex-col items-center justify-center bg-[#070707] px-8"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 1.2, ease: "easeInOut" }}
-    >
-      {/* Pulsing accent dot */}
-      <motion.div
-        className="mb-8 h-2 w-2 rounded-full bg-red-700"
-        animate={{ opacity: [0.4, 1, 0.4], scale: [0.9, 1.1, 0.9] }}
-        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-      />
-
-      <motion.p
-        className="mb-3 font-mono text-[9px] tracking-[0.5em] text-red-700/80 uppercase"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.6, delay: 0.4 }}
-      >
-        Briefing Complete
-      </motion.p>
-
-      <motion.h2
-        className="max-w-sm text-center font-serif text-2xl font-bold text-[#f0ebe3] md:text-3xl"
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 0.7, ease: "easeOut" }}
-      >
-        You have all the facts.
-      </motion.h2>
-
-      <motion.p
-        className="mt-4 font-mono text-xs tracking-[0.25em] text-zinc-500 uppercase"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.6, delay: 1.4 }}
-      >
-        Proceeding to discussion&hellip;
-      </motion.p>
-
-      {/* Horizontal progress line */}
-      <motion.div
-        className="mt-10 h-px bg-red-800/50"
-        initial={{ width: 0 }}
-        animate={{ width: 160 }}
-        transition={{ duration: 3.5, delay: 1.2, ease: "linear" }}
-      />
-    </motion.div>
-  );
-}
