@@ -6,6 +6,7 @@ import { socket } from "@/lib/socket";
 import { useRouter } from "next/navigation";
 import { usePlayerStore } from "@/stores/player-store";
 import { RoomState, useRoomStore } from "@/stores/room-store";
+import { useNotebookStore } from "@/stores/notebook-store";
 
 export default function CreateCaseDossier() {
   const [investigators, setInvestigators] = useState(4);
@@ -18,6 +19,7 @@ export default function CreateCaseDossier() {
   const router = useRouter();
   const { playerId, updatePlayer } = usePlayerStore();
   const { updateRoom } = useRoomStore();
+  const { clearNotes } = useNotebookStore();
 
   useEffect(() => {
     const handlePointerDown = (event: MouseEvent) => {
@@ -38,6 +40,7 @@ export default function CreateCaseDossier() {
 
   useEffect(() => {
     const handleRoomCreated = (room: RoomState) => {
+      clearNotes();
       updatePlayer({
         roomId: room.roomId,
         detectiveName,

@@ -6,6 +6,7 @@ import { socket } from "@/lib/socket";
 import { useRouter } from "next/navigation";
 import { RoomState, useRoomStore } from "@/stores/room-store";
 import { usePlayerStore } from "@/stores/player-store";
+import { useNotebookStore } from "@/stores/notebook-store";
 
 export default function AccessCaseDossier() {
   const [isGranted, setIsGranted] = useState(false);
@@ -14,10 +15,12 @@ export default function AccessCaseDossier() {
   const router = useRouter();
   const { playerId, updatePlayer } = usePlayerStore();
   const { updateRoom } = useRoomStore();
+  const { clearNotes } = useNotebookStore();
 
   useEffect(() => {
     const handlePlayerJoined = (room: RoomState) => {
       console.log("Successfully joined room:", room);
+      clearNotes();
       updatePlayer({
         roomId: room.roomId,
         detectiveName,
