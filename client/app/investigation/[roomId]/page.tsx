@@ -18,7 +18,8 @@ export default function InvestigationRoom() {
     roomId,
     resetRoom,
   } = useRoomStore();
-  const { playerId, isHost, resetPlayer, hasHydrated } = usePlayerStore();
+  const { playerId, isHost, resetPlayer, updatePlayer, hasHydrated } =
+    usePlayerStore();
   const router = useRouter();
   const params = useParams<{ roomId: string }>();
   const routeRoomId = useMemo(() => {
@@ -30,6 +31,10 @@ export default function InvestigationRoom() {
   useEffect(() => {
     const handleRoomUpdated = (room: RoomState) => {
       updateRoom(room);
+      updatePlayer({
+        roomId: room.roomId,
+        isHost: room.hostId === playerId,
+      });
       setIsRejoining(false);
       console.log("Room updated:", room);
     };
@@ -87,6 +92,7 @@ export default function InvestigationRoom() {
     resetRoom,
     routeRoomId,
     router,
+    updatePlayer,
     updateRoom,
   ]);
 
