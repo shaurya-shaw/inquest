@@ -9,6 +9,7 @@ import {
   MAX_INVESTIGATION_TIME,
   MIN_INVESTIGATION_TIME,
 } from "./investigation-config.js";
+import { loadCaseFile, getPublicCaseData } from "./case-loader.js";
 
 config();
 
@@ -410,6 +411,22 @@ io.on("connection", (socket) => {
       return;
     }
 
+    // Load the selected case file and build the public payload
+    if (!room.caseId) {
+      socket.emit("error", { message: "No case selected. Please select a case before starting." });
+      return;
+    }
+
+    let publicCaseData;
+    try {
+      const caseFile = loadCaseFile(room.caseId);
+      publicCaseData = getPublicCaseData(caseFile);
+    } catch (err) {
+      console.error(`Failed to load case "${room.caseId}":`, err);
+      socket.emit("error", { message: `Case file "${room.caseId}" could not be loaded.` });
+      return;
+    }
+
     // Initialise investigation phase state
     room.phase = "INVESTIGATION";
     room.phaseStartedAt = Date.now();
@@ -433,8 +450,11 @@ io.on("connection", (socket) => {
 
     investigationTimers.set(roomId, maxTimer);
 
+    // Emit case-data BEFORE room-updated so the client store is populated
+    // before the phase transition renders InvestigationPage
+    io.to(roomId).emit("case-data", publicCaseData);
     io.to(roomId).emit("room-updated", serializeRoom(room));
-    console.log(`Investigation started in room ${roomId}`);
+    console.log(`Investigation started in room ${roomId} with case "${room.caseId}"`);
   });
 
   socket.on("detective-ready", () => {
