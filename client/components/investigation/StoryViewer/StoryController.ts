@@ -83,11 +83,7 @@ export class StoryController {
    *  4. Re-speak if not muted
    */
   replay(): void {
-    if (
-      this.state.phase !== "playing" &&
-      this.state.phase !== "paused"
-    )
-      return;
+    if (this.state.phase !== "playing" && this.state.phase !== "paused") return;
 
     this.cancelAdvanceTimer();
     this.cancelNarration();
@@ -170,7 +166,7 @@ export class StoryController {
     if (!text) return;
 
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 0.9;
+    utterance.rate = 0.8;
     utterance.pitch = 1.0;
     utterance.volume = 1.0;
 

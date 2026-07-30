@@ -3,6 +3,8 @@ import InvestigationLobby from "@/components/lobby/Lobby";
 import { socket } from "@/lib/socket";
 import { usePlayerStore } from "@/stores/player-store";
 import { type RoomState, useRoomStore } from "@/stores/room-store";
+import { useCaseStore } from "@/stores/case-store";
+import type { PublicCaseData } from "@/lib/case-types";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useParams, useRouter } from "next/navigation";
@@ -20,6 +22,7 @@ export default function InvestigationRoom() {
   } = useRoomStore();
   const { playerId, isHost, resetPlayer, updatePlayer, hasHydrated } =
     usePlayerStore();
+  const { setCaseData, resetCase } = useCaseStore();
   const router = useRouter();
   const params = useParams<{ roomId: string }>();
   const routeRoomId = useMemo(() => {
@@ -39,11 +42,17 @@ export default function InvestigationRoom() {
       console.log("Room updated:", room);
     };
 
+    const handleCaseData = (data: PublicCaseData) => {
+      setCaseData(data);
+      console.log("Case data received:", data.story.title);
+    };
+
     const handleRoomClosed = ({ message }: { message: string }) => {
       toast.error(message);
       setIsRejoining(false);
       resetRoom();
       resetPlayer();
+      resetCase();
 
       setTimeout(() => {
         router.push("/");
@@ -55,6 +64,7 @@ export default function InvestigationRoom() {
       setIsRejoining(false);
       resetRoom();
       resetPlayer();
+      resetCase();
 
       setTimeout(() => {
         router.push("/");
@@ -73,6 +83,7 @@ export default function InvestigationRoom() {
     };
 
     socket.on("room-updated", handleRoomUpdated);
+    socket.on("case-data", handleCaseData);
     socket.on("room-closed", handleRoomClosed);
     socket.on("error", handleError);
     socket.on("connect", handleConnect);
@@ -81,6 +92,7 @@ export default function InvestigationRoom() {
 
     return () => {
       socket.off("room-updated", handleRoomUpdated);
+      socket.off("case-data", handleCaseData);
       socket.off("room-closed", handleRoomClosed);
       socket.off("error", handleError);
       socket.off("connect", handleConnect);
@@ -88,10 +100,12 @@ export default function InvestigationRoom() {
   }, [
     hasHydrated,
     playerId,
+    resetCase,
     resetPlayer,
     resetRoom,
     routeRoomId,
     router,
+    setCaseData,
     updatePlayer,
     updateRoom,
   ]);

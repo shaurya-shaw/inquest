@@ -12,7 +12,10 @@ export default function CreateCaseDossier() {
   const [investigators, setInvestigators] = useState(4);
   const [isClassified, setIsClassified] = useState(false);
   const [isChapterOpen, setIsChapterOpen] = useState(false);
-  const [caseChapter, setCaseChapter] = useState("The Last Call");
+  const [selectedCase, setSelectedCase] = useState<{ label: string; id: string }>({
+    label: "The Last Call",
+    id: "the-last-call",
+  });
   const [detectiveName, setDetectiveName] = useState("");
   const chapterDropdownRef = useRef<HTMLDivElement>(null);
 
@@ -69,7 +72,7 @@ export default function CreateCaseDossier() {
     socket.emit("create-room", {
       name: detectiveName,
       maxInvestigators: investigators,
-      caseId: caseChapter,
+      caseId: selectedCase.id,
       playerId,
     });
   };
@@ -154,7 +157,7 @@ export default function CreateCaseDossier() {
               onClick={() => setIsChapterOpen((current) => !current)}
               className="flex w-full items-center justify-between border-b-2 border-zinc-800/50 bg-transparent pb-2 text-left text-lg text-zinc-900 transition-colors hover:border-zinc-900 focus:border-zinc-900 focus:outline-none"
             >
-              <span>{caseChapter}</span>
+              <span>{selectedCase.label}</span>
               <ChevronDown
                 className={`h-4 w-4 text-zinc-700 transition-transform duration-200 ${
                   isChapterOpen ? "rotate-180" : ""
@@ -164,21 +167,21 @@ export default function CreateCaseDossier() {
 
             {isChapterOpen && (
               <div className="absolute left-0 right-0 top-full z-30 mt-2 overflow-hidden rounded-sm border border-zinc-800/30 bg-[#e1d5c0] shadow-[0_12px_30px_rgba(0,0,0,0.18)]">
-                {["The Last Call", "Neon Blood", "Syntax Error"].map(
-                  (chapter) => (
-                    <button
-                      key={chapter}
-                      type="button"
-                      onClick={() => {
-                        setCaseChapter(chapter);
-                        setIsChapterOpen(false);
-                      }}
-                      className="block w-full px-4 py-3 text-left font-mono text-sm text-zinc-900 transition-colors hover:bg-zinc-900/10"
-                    >
-                      {chapter}
-                    </button>
-                  ),
-                )}
+                {([
+                  { label: "The Last Call", id: "the-last-call" },
+                ] as { label: string; id: string }[]).map((c) => (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => {
+                      setSelectedCase(c);
+                      setIsChapterOpen(false);
+                    }}
+                    className="block w-full px-4 py-3 text-left font-mono text-sm text-zinc-900 transition-colors hover:bg-zinc-900/10"
+                  >
+                    {c.label}
+                  </button>
+                ))}
               </div>
             )}
           </div>
