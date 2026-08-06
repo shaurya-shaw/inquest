@@ -1,8 +1,10 @@
 /**
  * Client-side type definitions for case data received from the server.
  *
- * These are the PUBLIC-ONLY types — secret fields (truth, suspect role, secrets,
- * unknownFacts, memories, interrogationConstraints) are never included here.
+ * These are the PUBLIC-ONLY types — secret fields (murdererId, suspect role,
+ * secrets, unknownFacts, memories, interrogationConstraints, emotionalVulnerability,
+ * moralJustification, deflectionTarget, evidence implication/truth data) are
+ * never included here.
  */
 
 export interface CaseStory {
@@ -32,16 +34,13 @@ export interface PublicSuspect {
   publicAlibi: string;
   possibleMotive: string;
   knownFacts: string[];
-  relationships: string[];
 }
 
-export interface CaseEvidence {
+/** Evidence visible to players — no implication or truth data */
+export interface PublicEvidence {
   id: string;
-  title: string;
+  name: string;
   description: string;
-  /** Index of the story paragraph after which this evidence becomes relevant */
-  unlockParagraph: number;
-  importance: "low" | "medium" | "high" | "critical";
 }
 
 export interface CaseTimelineEvent {
@@ -56,8 +55,9 @@ export interface CaseTimelineEvent {
 /** Full payload received from the server's `case-data` Socket.IO event */
 export interface PublicCaseData {
   story: CaseStory;
+  caseBrief: string;
   victim: CaseVictim;
   suspects: PublicSuspect[];
-  evidence: CaseEvidence[];
+  evidence: PublicEvidence[];
   timeline: CaseTimelineEvent[];
 }

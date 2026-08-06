@@ -4,7 +4,9 @@ import { dirname, join } from "path";
 import type {
   CaseFile,
   CaseSuspect,
+  EvidenceCatalogEntry,
   PublicCaseData,
+  PublicEvidence,
   PublicSuspect,
 } from "./types.js";
 
@@ -37,7 +39,12 @@ export function loadCaseFile(caseId: string): CaseFile {
   }
 }
 
-/** Strips a full CaseSuspect down to the public-safe PublicSuspect */
+/**
+ * Strips a full CaseSuspect down to the public-safe PublicSuspect.
+ *
+ * Removes: unknownFacts, secrets, memories, interrogationConstraints,
+ *          role, emotionalVulnerability, moralJustification, deflectionTarget
+ */
 function toPublicSuspect(suspect: CaseSuspect): PublicSuspect {
   return {
     id: suspect.id,
@@ -51,8 +58,19 @@ function toPublicSuspect(suspect: CaseSuspect): PublicSuspect {
     publicAlibi: suspect.publicAlibi,
     possibleMotive: suspect.possibleMotive,
     knownFacts: suspect.knownFacts,
-    relationships: suspect.relationships,
-    // unknownFacts, secrets, memories, interrogationConstraints, role — OMITTED
+  };
+}
+
+/**
+ * Strips an EvidenceCatalogEntry down to client-safe PublicEvidence.
+ *
+ * Removes: superficiallyImplicates, innocentExplanation, trueSequenceOfEvents
+ */
+function toPublicEvidence(entry: EvidenceCatalogEntry): PublicEvidence {
+  return {
+    id: entry.id,
+    name: entry.name,
+    description: entry.description,
   };
 }
 
@@ -60,16 +78,20 @@ function toPublicSuspect(suspect: CaseSuspect): PublicSuspect {
  * Filters a full CaseFile down to a PublicCaseData payload safe to send to clients.
  *
  * Strips:
- * - truth (murderer identity, weapon, full explanation)
+ * - murdererId
+ * - suspectAccountedLocations
  * - hidden timeline events
- * - suspect secrets, unknownFacts, memories, interrogationConstraints, role
+ * - suspect secrets, unknownFacts, memories, interrogationConstraints, role,
+ *   emotionalVulnerability, moralJustification, deflectionTarget
+ * - evidence superficiallyImplicates, innocentExplanation, trueSequenceOfEvents
  */
 export function getPublicCaseData(caseFile: CaseFile): PublicCaseData {
   return {
     story: caseFile.story,
+    caseBrief: caseFile.caseBrief,
     victim: caseFile.victim,
     suspects: caseFile.suspects.map(toPublicSuspect),
-    evidence: caseFile.evidence,
+    evidence: caseFile.evidenceCatalog.map(toPublicEvidence),
     timeline: caseFile.timeline.filter((e) => e.visibility === "public"),
   };
 }

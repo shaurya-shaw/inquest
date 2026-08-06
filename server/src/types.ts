@@ -64,6 +64,54 @@ export interface CaseVictim {
   background: string;
 }
 
+// ── Suspect sub-types ──────────────────────────────────────────────────────
+
+export interface UnknownFact {
+  id: string;
+  /** Must match an evidence catalog entry id */
+  triggerEvidenceId: string;
+  /** The hidden truth this fact contains */
+  content: string;
+  /** Behavior instruction when confronted with this evidence */
+  reactionInstruction: string;
+  /** Integer, -8 to -20 — applied to composure when triggered */
+  composureDelta: number;
+}
+
+export interface SuspectSecret {
+  id: string;
+  /** Ground truth — never stated outright by the suspect */
+  content: string;
+  /** 3-4 exact phrases that would only appear if the model is about to leak this secret */
+  leakCanaries: string[];
+  /** Optional: a visible crack without confession when specific evidence lands */
+  tell?: {
+    triggerEvidenceId: string;
+    reactionInstruction: string;
+    composureDelta: number;
+  };
+}
+
+export interface EmotionalVulnerability {
+  /** Clause droppable directly after "Reference your emotional vulnerability: " */
+  summary: string;
+  /** Specific subjects/phrases a player can raise to build trust unusually fast */
+  triggerTopics: string[];
+}
+
+export interface MoralJustification {
+  /** Full paragraph the character would actually say once rationalizing — not a design note */
+  statement: string;
+}
+
+export interface DeflectionTarget {
+  suspectId: string;
+  /** Droppable directly after "steering attention toward " */
+  displayName: string;
+  /** The specific real thing they observed and will surface */
+  angle: string;
+}
+
 /** Full suspect record — lives only on the server, never sent whole to clients */
 export interface CaseSuspect {
   id: string;
@@ -77,27 +125,38 @@ export interface CaseSuspect {
   publicAlibi: string;
   possibleMotive: string;
   knownFacts: string[];
-  /** Never sent to clients */
-  unknownFacts: string[];
-  /** Never sent to clients */
-  secrets: string[];
+  /** Never sent to clients — gated behind evidence presentation */
+  unknownFacts: UnknownFact[];
+  /** Never sent to clients — guarded by leak canaries */
+  secrets: SuspectSecret[];
   /** Sent only during interrogation phase */
   memories: string[];
-  relationships: string[];
   /** Never sent to clients */
   interrogationConstraints: string[];
   /** Never sent to clients */
   role: "murderer" | "innocent";
+  emotionalVulnerability: EmotionalVulnerability;
+  /** Only present on murderer — used when rationalization gate opens */
+  moralJustification?: MoralJustification;
+  /** Only present on innocent — used when deflection gate opens */
+  deflectionTarget?: DeflectionTarget;
 }
 
-export interface CaseEvidence {
+// ── Evidence ───────────────────────────────────────────────────────────────
+
+export interface EvidenceCatalogEntry {
   id: string;
-  title: string;
+  name: string;
   description: string;
-  /** Index of the story paragraph after which this evidence becomes relevant */
-  unlockParagraph: number;
-  importance: "low" | "medium" | "high" | "critical";
+  /** Which suspect this evidence superficially implicates */
+  superficiallyImplicates: string;
+  /** What the implicated suspect would say if confronted */
+  innocentExplanation: string;
+  /** Game-master only — the actual truth behind this evidence */
+  trueSequenceOfEvents: string;
 }
+
+// ── Timeline ───────────────────────────────────────────────────────────────
 
 export interface CaseTimelineEvent {
   time: string;
@@ -107,25 +166,25 @@ export interface CaseTimelineEvent {
   visibility: "public" | "hidden";
 }
 
-export interface CaseTruth {
-  murdererId: string;
-  motive: string;
-  weapon: string;
-  causeOfDeath: string;
-  coverUp: string;
-  explanation: string;
-  clueBreakdown: string[];
+export interface SuspectAccountedLocation {
+  hour: string;
+  /** suspectId → their claimed location during this hour */
+  locations: Record<string, string>;
 }
 
-/** The full case file structure — server-only, never sent whole to clients */
+// ── Full case file (server-only, never sent whole to clients) ──────────────
+
 export interface CaseFile {
   story: CaseStory;
+  /** One-paragraph noir-style summary for lobby/results */
+  caseBrief: string;
   victim: CaseVictim;
   suspects: CaseSuspect[];
-  evidence: CaseEvidence[];
+  evidenceCatalog: EvidenceCatalogEntry[];
   timeline: CaseTimelineEvent[];
-  truth: CaseTruth;
-  difficulty: "easy" | "medium" | "hard";
+  suspectAccountedLocations: SuspectAccountedLocation[];
+  /** Checked against player votes to determine win/loss */
+  murdererId: string;
 }
 
 // ── Public subsets sent to clients ───────────────────────────────────────────
@@ -143,15 +202,23 @@ export interface PublicSuspect {
   publicAlibi: string;
   possibleMotive: string;
   knownFacts: string[];
-  relationships: string[];
+}
+
+/** Evidence visible to players — no implication/truth data */
+export interface PublicEvidence {
+  id: string;
+  name: string;
+  description: string;
 }
 
 /** Full payload emitted via the `case-data` Socket.IO event when investigation starts */
 export interface PublicCaseData {
   story: CaseStory;
+  caseBrief: string;
   victim: CaseVictim;
   suspects: PublicSuspect[];
-  evidence: CaseEvidence[];
+  evidence: PublicEvidence[];
   /** Only events with visibility: "public" */
   timeline: CaseTimelineEvent[];
 }
+
