@@ -2,7 +2,7 @@ import { create } from "zustand";
 import type {
   CaseStory,
   CaseVictim,
-  CaseEvidence,
+  PublicEvidence,
   CaseTimelineEvent,
   PublicSuspect,
   PublicCaseData,
@@ -10,9 +10,10 @@ import type {
 
 interface CaseState {
   story: CaseStory | null;
+  caseBrief: string | null;
   victim: CaseVictim | null;
   suspects: PublicSuspect[];
-  evidence: CaseEvidence[];
+  evidence: PublicEvidence[];
   timeline: CaseTimelineEvent[];
 
   /** Populate the store from the server's `case-data` event payload */
@@ -23,6 +24,7 @@ interface CaseState {
 
 const initialState = {
   story: null,
+  caseBrief: null,
   victim: null,
   suspects: [],
   evidence: [],
@@ -35,6 +37,7 @@ export const useCaseStore = create<CaseState>((set) => ({
   setCaseData: (data) =>
     set({
       story: data.story,
+      caseBrief: data.caseBrief,
       victim: data.victim,
       suspects: data.suspects,
       evidence: data.evidence,
