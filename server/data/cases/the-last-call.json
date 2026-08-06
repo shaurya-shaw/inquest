@@ -1,211 +1,331 @@
 {
   "story": {
     "title": "The Last Call",
-    "caseId": "CASE-0091",
+    "caseId": "CASE-0042",
     "paragraphs": [
-      "The body of Marcus Veil, 44, was discovered at 11:22 PM inside the private booth of Meridian Bar , a members-only establishment in the financial district. A single glass of Scotch sat untouched on the table. There were no signs of a struggle. Staff say Veil had reserved the booth for two. The second guest never arrived — or so they claim.",
-      "Veil was a forensic accountant known for building cases against white-collar criminals. His firm had recently been retained by the city's fraud bureau. Preliminary findings suggest poisoning: no visible wounds, lips slightly discolored, consistent with fast-acting cardiac toxins. The coroner has not yet confirmed cause of death. His phone was found wiped clean — factory reset.",
-      "Two individuals are confirmed to have had contact with Veil that evening. First: Diane Holst, 39, Veil's former business partner. She was seen entering the bar at 9:45 PM and leaving at 10:30 PM — forty minutes before Veil was found. She says they argued about money. She says she left him alive.",
-      "Second: Owen Rask, 51, a private investigator Veil had hired three weeks prior. Rask claims he met Veil briefly to hand over a surveillance report. He says he was gone by 10:00 PM. The bartender recalls one of them ordering a second round. Neither admits to it. The CCTV footage covering that section of the bar was overwritten earlier that night.",
-      "Three evidence items have been recovered. A paper cocktail napkin found under the table bears a partial set of figures — account numbers, possibly. The ink is smeared but legible in part. A vial of clear liquid, recovered from beneath a seat cushion in the booth, has been sent to the lab. Veil's briefcase, found in the coat check, contained a sealed envelope addressed to a federal prosecutor.",
-      "You now hold everything that was found at the scene. The booth, the glass, the wiped phone, the envelope never opened. Someone in that bar knew why Marcus Veil would not be finishing his drink. The investigation begins now."
+      "The body of Ray Hollis, 52, was found at 6:14 AM at the base of the service stairwell inside the Anchor, a converted warehouse on the eastern docks that houses three startup offices and a shared rooftop terrace. His neck was broken. The fall was two stories.",
+      "Hollis ran a marine logistics company from the second floor. He was known for undercutting competitors, poaching contracts from smaller operators, and leveraging personal relationships to win port authority bids. Two weeks ago he secured exclusive docking rights for the eastern pier, a deal that bankrupted at least one rival outfit.",
+      "The building's security log shows two people entered after hours. First: Nadia Soren, 36, a structural engineer whose firm occupies the third floor. She badged in at 10:52 PM and badged out at 12:30 AM. She says she came to retrieve project files from her office and never saw Hollis.",
+      "Second: Joel Maret, 45, a former dockworker turned fleet coordinator who lost his independent shipping contract when Hollis took the pier deal. He entered at 11:15 PM using a guest pass Hollis had issued him earlier that day. He badged out at 1:10 AM. He says Hollis invited him to discuss a job offer.",
+      "The stairwell door on the second floor was found propped open with a fire extinguisher. A steel thermos belonging to Hollis was recovered from the landing where he fell, dented and empty. His office chair had been knocked sideways. A set of wet boot prints led from the rooftop access door down to the third-floor corridor, though it had not rained that night.",
+      "The rooftop terrace contains a water tank, a drainage grate, and an unmarked utility box. Residue consistent with industrial solvent was found on the stairwell railing near the second floor. Hollis had a bruise on his right forearm inconsistent with the fall itself. The medical examiner has not yet ruled whether the death was accidental or deliberate.",
+      "Both suspects had reason to be in the building. Both had reason to resent Hollis. One of them walked past his body on the way out and said nothing.",
+      "Your task is to determine which one."
     ]
   },
+  "caseBrief": "A man who made his fortune stealing other people's livelihoods was found at the bottom of a stairwell with a broken neck. Two people were in the building that night. Both had keys. Both had grudges. The fall was two stories — just enough to kill, just enough to be an accident. Someone knows which it was.",
   "victim": {
-    "id": "victim-marcus-veil",
-    "name": "Marcus Veil",
-    "age": 44,
-    "occupation": "Forensic Accountant",
-    "background": "Marcus Veil built his reputation exposing financial fraud. He worked quietly, methodically, and made powerful enemies. He was recently retained by the city's fraud bureau on a case involving misappropriated public funds. Those who knew him describe a man who trusted no one — and kept meticulous records of everything."
+    "id": "victim-ray-hollis",
+    "name": "Ray Hollis",
+    "age": 52,
+    "occupation": "Marine Logistics Operator",
+    "background": "Ray Hollis built his company by being ruthless. He undercut competitors, exploited personal relationships with port officials, and had no reservations about destroying smaller operators to expand his reach. Two weeks before his death he secured exclusive docking rights that bankrupted a rival. He was not well liked, but he was effective. Those who worked with him describe a man who believed business was war and acted accordingly."
   },
   "suspects": [
     {
-      "id": "suspect-diane-holst",
-      "name": "Diane Holst",
-      "age": 39,
-      "occupation": "Financial Consultant (former forensic accounting partner)",
-      "relationshipToVictim": "Former business partner. They co-founded their accounting firm six years ago before an acrimonious split two years prior. Diane retained some clients; Marcus retained the firm's name and reputation.",
-      "personality": "Controlled, articulate, and very deliberate in her word choices. She presents a professional surface but is visibly unsettled when pressed. She will not lose her composure easily — but she will deflect.",
-      "speakingStyle": "Measured, formal, slight pauses before answering sensitive questions. Occasionally uses legalese or corporate language as a shield. Does not volunteer information.",
-      "currentEmotionalState": "Tightly contained anxiety. Defensive but composed. She is preparing a story, not simply telling one.",
-      "publicAlibi": "She claims she arrived at the bar at 9:45 PM to meet Veil and discuss a financial dispute regarding revenue from shared clients. She says they argued, she left at 10:30 PM, and Veil was alive when she walked out. A doorman at her apartment building confirms she arrived home at 11:05 PM.",
-      "possibleMotive": "Veil's current fraud bureau case involves accounts that may implicate Diane in financial misconduct from their partnership period. If his investigation produced records tracing misappropriation back to her, she stood to be criminally charged.",
+      "id": "suspect-nadia-soren",
+      "name": "Nadia Soren",
+      "age": 36,
+      "occupation": "Structural Engineer",
+      "relationshipToVictim": "Tenant in the same building. Nadia's firm occupies the third floor. She and Hollis had a professional but strained relationship — he had pressured her firm to falsify a load-bearing assessment for one of his warehouse renovations eighteen months ago. She refused. He threatened to have her lease terminated.",
+      "personality": "Precise, composed, and quietly intense. She does not raise her voice but her silences carry weight. She is used to being the smartest person in a room and does not hide it. Under stress she becomes more clinical, not less.",
+      "speakingStyle": "Clear, structured sentences. Uses technical language naturally. Pauses before answering anything she considers a leading question. Will correct imprecise statements. Does not use filler words.",
+      "currentEmotionalState": "Controlled frustration layered over genuine fear. She knows how this looks. She is trying to manage the situation the way she manages a project — with precision — but the stakes are personal and she is not used to that.",
+      "publicAlibi": "She says she arrived at 10:52 PM to retrieve project files she needed for a morning deadline. She went directly to her third-floor office, worked for approximately ninety minutes, and left at 12:30 AM. She says she did not go to the second floor, did not see Hollis, and did not hear anything unusual.",
+      "possibleMotive": "Hollis had been pressuring the building owner to terminate Nadia's lease after she refused to falsify the structural assessment. If successful, her firm would lose its office and the project contracts tied to that address. She had complained to colleagues that Hollis was trying to destroy her business.",
       "knownFacts": [
-        "She was present in the bar between 9:45 PM and 10:30 PM.",
-        "She and Veil had an unresolved financial dispute stemming from their partnership dissolution.",
-        "She was aware of Veil's current fraud bureau engagement.",
-        "She ordered a gin and tonic when she arrived — confirmed by the bartender."
+        "She was in the building between 10:52 PM and 12:30 AM.",
+        "Her office is on the third floor, one floor above Hollis's.",
+        "She refused to falsify a structural assessment for Hollis eighteen months ago.",
+        "Hollis was attempting to have her lease terminated."
       ],
       "unknownFacts": [
-        "She had researched cardiac glycoside compounds six months prior — browser history retrieved from a work machine she discarded.",
-        "The account numbers on the cocktail napkin partially match an offshore account in her name.",
-        "She met with a pharmacist contact the week before the murder."
+        {
+          "id": "uf-nadia-rooftop",
+          "triggerEvidenceId": "evidence-boot-prints",
+          "content": "The wet boot prints on the third-floor corridor are hers. She went to the rooftop terrace that night to smoke. The water on her boots came from stepping near the drainage grate, which was pooling runoff from the water tank.",
+          "reactionInstruction": "Become visibly rigid. Pause before answering. Admit to the rooftop visit reluctantly, framing it as irrelevant — she went up to smoke, came back down, it has nothing to do with Hollis. Do not volunteer the detail about the drainage grate unless pressed.",
+          "composureDelta": -12
+        },
+        {
+          "id": "uf-nadia-solvent",
+          "triggerEvidenceId": "evidence-solvent-residue",
+          "content": "Industrial solvent is a standard material in her line of work. She had a canister in her office for cleaning drafting equipment. She did not bring it to the stairwell. The residue on the railing was not left by her.",
+          "reactionInstruction": "Respond with controlled precision. Acknowledge that her firm uses industrial solvent professionally but firmly deny any connection to the railing residue. Point out that solvent is also used in marine equipment maintenance — Joel's area of work.",
+          "composureDelta": -10
+        }
       ],
       "secrets": [
-        "She poisoned Veil's drink before leaving the bar. She slipped the compound into his glass under the pretense of reaching across the table during their argument.",
-        "The vial recovered from the booth cushion belongs to her — she dropped it in the dark when she was leaving."
+        {
+          "id": "secret-nadia-heard-argument",
+          "content": "She heard Hollis and Joel arguing on the second floor while she was coming down from the rooftop at approximately 12:10 AM. She heard raised voices and what sounded like furniture scraping. She did not intervene. She walked past the second-floor landing, saw the stairwell door propped open, and left the building without looking inside.",
+          "leakCanaries": [
+            "I heard them arguing",
+            "voices from the second floor",
+            "I walked past and didn't stop",
+            "furniture scraping on the second floor"
+          ]
+        }
       ],
       "memories": [
-        "She remembers the booth being poorly lit. She remembers Marcus refusing to look at her.",
-        "She remembers placing her bag on the seat beside her, then picking it up quickly before leaving.",
-        "She remembers thinking the bartender had looked at her when she stood up."
-      ],
-      "relationships": [
-        "Marcus Veil — former partner, current adversary",
-        "Owen Rask — has no prior relationship; may have seen him in the bar"
+        "She remembers the stairwell being poorly lit when she came down from the rooftop.",
+        "She remembers the fire extinguisher propping the stairwell door open on the second floor and thinking it was a fire code violation.",
+        "She remembers hurrying past the second floor because she did not want to encounter Hollis."
       ],
       "interrogationConstraints": [
-        "Will not admit to any financial wrongdoing without direct evidence being presented.",
-        "Will not acknowledge knowing anything about the vial.",
-        "Will redirect questions about the napkin to Veil's habits.",
-        "Will become evasive if questioned about the week before the murder."
+        "Will not voluntarily admit she went to the rooftop unless confronted with boot print evidence.",
+        "Will not voluntarily admit she heard the argument unless composure is below 30 and trust is above 60.",
+        "Will deflect questions about her feelings toward Hollis into professional language.",
+        "Will point out that Joel had a stronger motive if she feels cornered."
       ],
-      "role": "murderer"
+      "role": "innocent",
+      "emotionalVulnerability": {
+        "summary": "the knowledge that she heard something violent happening and chose to walk away rather than intervene, and the guilt of wondering whether Hollis might still be alive if she had opened that door.",
+        "triggerTopics": [
+          "walking away when someone needed help",
+          "guilt about not intervening",
+          "hearing something and doing nothing",
+          "could you have saved him"
+        ]
+      },
+      "deflectionTarget": {
+        "suspectId": "suspect-joel-maret",
+        "displayName": "Joel",
+        "angle": "Joel lost everything because of Hollis. His business, his contracts, his crew. He had a guest pass — Hollis invited him there. Ask yourself why a man who just destroyed someone's livelihood would invite them to an empty building at eleven at night."
+      }
     },
     {
-      "id": "suspect-owen-rask",
-      "name": "Owen Rask",
-      "age": 51,
-      "occupation": "Private Investigator",
-      "relationshipToVictim": "Professional client. Veil hired Rask three weeks prior to conduct surveillance on a person of interest connected to the fraud bureau case — identity not disclosed to Rask.",
-      "personality": "Gruff, economical with words, and fundamentally uninterested in softening his manner. He answers what is asked and nothing more. He is not lying — he simply does not believe he owes anyone an explanation.",
-      "speakingStyle": "Short sentences. Direct. Will sometimes answer a question with a question. Does not speculate. Occasionally sarcastic when he thinks a question is foolish.",
-      "currentEmotionalState": "Irritated at being questioned. Slightly uncomfortable — not because he is guilty, but because he knows he looks suspicious and there is little he can do about it.",
-      "publicAlibi": "He met Veil at the bar to hand over a completed surveillance report in person. He says Veil insisted on physical delivery — no digital trail. He arrived at approximately 9:55 PM, handed over a sealed folder, and was out of the bar by 10:05 PM. No one can confirm this precisely; the bartender remembers him but cannot fix the departure time.",
-      "possibleMotive": "Veil had not yet paid the final invoice for Rask's work — a sum of four thousand dollars. If Veil was preparing to disappear or was about to be arrested himself, Rask would lose the money. There is also the possibility that the surveillance target discovered they were being watched — and that Veil or Rask was the leak.",
+      "id": "suspect-joel-maret",
+      "name": "Joel Maret",
+      "age": 45,
+      "occupation": "Fleet Coordinator (formerly independent shipping contractor)",
+      "relationshipToVictim": "Professional rival turned dependent. Joel ran a small independent shipping operation for twelve years. When Hollis secured exclusive docking rights for the eastern pier, Joel lost his primary berth and his three largest contracts. His business collapsed within a week. Hollis then offered Joel a job as a fleet coordinator — working under the man who had destroyed him.",
+      "personality": "Working-class direct, with a slow-burning temper he has learned to keep on a leash. He is not articulate in the way professionals are, but he is observant and his memory for detail is excellent. He does not trust easily and he does not forget slights.",
+      "speakingStyle": "Short, blunt sentences. Uses concrete language — names, times, specific objects. Occasionally trails off mid-sentence when a topic touches something painful. Will answer direct questions directly but becomes evasive when asked about his feelings.",
+      "currentEmotionalState": "A grinding mix of resentment, shame, and suppressed grief. He is angry at Hollis, angry at himself for showing up that night, and deeply aware that his presence in the building makes him look guilty. He is not performing innocence — he is enduring suspicion.",
+      "publicAlibi": "He says Hollis contacted him that afternoon and asked him to come to the office at 11 PM to discuss a fleet coordinator position. He arrived at 11:15 PM, went to Hollis's second-floor office, and they talked for about an hour. He says the conversation was tense but professional. He left at 1:10 AM. He says Hollis was alive and sitting at his desk when he walked out.",
+      "possibleMotive": "Hollis destroyed Joel's independent business by taking the pier contract. Joel lost twelve years of work in a week. The job offer could be seen as humiliation — working for the man who ruined you. Joel had both financial motive and personal rage.",
       "knownFacts": [
-        "He was hired by Veil three weeks before the murder.",
-        "He was present in the bar on the night of the murder.",
-        "He delivered a physical surveillance report to Veil.",
-        "He has a prior conviction for obstruction of justice, eleven years ago."
+        "He was in the building between 11:15 PM and 1:10 AM.",
+        "He used a guest pass issued by Hollis to enter.",
+        "His independent shipping business collapsed after Hollis secured the pier deal.",
+        "He has no history of violence."
       ],
       "unknownFacts": [
-        "The surveillance subject he was tracking was a mid-level city official — one who appears in the same fraud bureau case files Veil was building.",
-        "Rask had photographed Diane Holst meeting with that official twice in the past month, though he did not know her identity at the time.",
-        "The sealed report delivered to Veil may have contained the evidence that made him a target."
+        {
+          "id": "uf-joel-thermos",
+          "triggerEvidenceId": "evidence-thermos",
+          "content": "The thermos belonged to Hollis, not Joel. Hollis was drinking from it during their meeting. Joel never touched it. He does not know how it ended up on the stairwell landing.",
+          "reactionInstruction": "Look confused, then defensive. State flatly that the thermos was on Hollis's desk when they were talking. He did not take it. He did not see Hollis carry it out of the office. Ask why it matters.",
+          "composureDelta": -8
+        },
+        {
+          "id": "uf-joel-chair",
+          "triggerEvidenceId": "evidence-overturned-chair",
+          "content": "The chair was knocked over during a heated moment in their conversation. Joel stood up suddenly when Hollis made a remark about Joel's crew not being 'real sailors.' Hollis's chair rolled back and tipped. Joel did not touch Hollis. He left the chair where it fell.",
+          "reactionInstruction": "Tense visibly. Admit the chair got knocked over but insist it was not a physical confrontation. Say Hollis said something cruel and Joel stood up too fast. Become quiet afterward — this is a moment he is ashamed of.",
+          "composureDelta": -14
+        },
+        {
+          "id": "uf-joel-extinguisher",
+          "triggerEvidenceId": "evidence-propped-door",
+          "content": "Joel propped the stairwell door open with the fire extinguisher when he arrived because the door lock was sticky and he did not want to get locked in the stairwell. This is a habit from his years working in dockside buildings with unreliable hardware. He did not think about it.",
+          "reactionInstruction": "Shrug it off as a practical habit. Say the door sticks and he did not want to get trapped. Become impatient if the question is pressed — he sees it as trivial.",
+          "composureDelta": -8
+        }
       ],
       "secrets": [
-        "He suspects — but does not know — that the surveillance work he completed for Veil may have put Veil in danger.",
-        "He did not order the second round the bartender mentioned. He does not know who did."
+        {
+          "id": "secret-joel-pushed-hollis",
+          "content": "After Joel left Hollis's office at approximately 1:00 AM, he went down the stairwell. Hollis followed him to the second-floor landing, still talking, still pressing the job offer. Joel turned around and shoved Hollis backward. Hollis stumbled, hit the railing, and went over. Joel heard the impact. He stood on the landing for approximately thirty seconds, then walked down and left the building. He did not check on Hollis. He did not call anyone.",
+          "leakCanaries": [
+            "I pushed him",
+            "he went over the railing",
+            "I shoved him and he fell",
+            "I heard him hit the ground"
+          ],
+          "tell": {
+            "triggerEvidenceId": "evidence-forearm-bruise",
+            "reactionInstruction": "Go very still. Stare at a fixed point. Say nothing for a moment, then say quietly that he does not know how Hollis got that bruise. His voice should lose all its defensive energy. This is the closest he comes to breaking without confessing.",
+            "composureDelta": -18
+          }
+        },
+        {
+          "id": "secret-joel-solvent",
+          "content": "Joel's hands had industrial solvent on them from cleaning marine engine parts earlier that day. When he grabbed the stairwell railing on his way out, he transferred the residue. He did not think about it at the time. He does not know the residue was found.",
+          "leakCanaries": [
+            "solvent from my hands",
+            "I left the residue on the railing",
+            "cleaning engine parts that day",
+            "my hands were still greasy"
+          ]
+        }
       ],
       "memories": [
-        "He remembers a woman in the booth with Veil when he arrived — dark coat, her back to the room.",
-        "He remembers Veil looking pale when he took the folder. He assumed it was stress.",
-        "He remembers the walk out being quick. He did not look back."
-      ],
-      "relationships": [
-        "Marcus Veil — hired him; professional, not personal",
-        "Diane Holst — does not know her by name, but his surveillance photos include her"
+        "He remembers Hollis offering him coffee from the thermos. He declined.",
+        "He remembers the chair tipping when he stood up. He remembers Hollis not flinching.",
+        "He remembers Hollis following him into the stairwell, still talking about the job as if nothing had happened during their argument.",
+        "He remembers the sound of the impact from below. He remembers standing on the landing and not looking down."
       ],
       "interrogationConstraints": [
-        "Will not name the surveillance subject without being pressed — considers it a professional confidentiality issue.",
-        "Will not speculate about who ordered the second round.",
-        "Will become genuinely terse if accused directly — he did not do it and he knows it."
+        "Will not admit to the shove unless composure is below 20.",
+        "Will not explain the solvent residue unless directly asked about his hands.",
+        "Will admit the chair was knocked over if confronted with evidence, but will frame it as non-violent.",
+        "Will become quiet and withdrawn, not aggressive, when pressure increases.",
+        "Will not blame Nadia unless he feels he is about to be formally accused."
       ],
-      "role": "innocent"
+      "role": "murderer",
+      "emotionalVulnerability": {
+        "summary": "the humiliation of being offered a job by the man who destroyed his life, and the twelve years of work that vanished in a week because someone with more money decided they wanted what he had.",
+        "triggerTopics": [
+          "losing everything you built",
+          "working for someone who ruined you",
+          "twelve years of work gone",
+          "what it feels like to have no options left"
+        ]
+      },
+      "moralJustification": {
+        "statement": "He took everything from me. Twelve years. My crew, my contracts, my berth — gone in a week because he wanted the pier and he had the connections to take it. And then he calls me in at eleven at night to offer me a job. A job. Working for him. Moving his cargo on a dock that used to be mine. He stood there in that stairwell telling me it was a good opportunity, like I should be grateful. I did not plan what happened. I turned around and I pushed him because I could not listen to one more word. That is what happened. I am not going to pretend I feel nothing about it. But I did not go there to kill him. I went there because I had nothing left and he knew it."
+      }
     }
   ],
-  "evidence": [
+  "evidenceCatalog": [
     {
-      "id": "evidence-napkin",
-      "title": "Cocktail Napkin",
-      "description": "A paper napkin recovered from under the booth table. Partial figures are written in blue ink — several appear to be account numbers or routing codes. The ink is smeared in one corner, consistent with liquid contact. The handwriting does not match Veil's known samples.",
-      "unlockParagraph": 4,
-      "importance": "critical"
+      "id": "evidence-boot-prints",
+      "name": "Wet Boot Prints",
+      "description": "A set of wet boot prints leading from the rooftop access door down to the third-floor corridor. It had not rained that night. The prints are consistent with women's work boots, size 8.",
+      "superficiallyImplicates": "suspect-nadia-soren",
+      "innocentExplanation": "I went to the rooftop to smoke. There is pooling water near the drainage grate from the tank overflow. I stepped through it. That is all.",
+      "trueSequenceOfEvents": "Nadia went to the rooftop terrace at approximately 11:50 PM to smoke. She stepped through standing water near the drainage grate. When she came back down, she tracked wet prints along the third-floor corridor and into the stairwell. These prints prove she was on the upper floors but have no connection to the murder on the second-floor landing."
     },
     {
-      "id": "evidence-vial",
-      "title": "Clear Vial",
-      "description": "A small glass vial, approximately 5ml, recovered from beneath the seat cushion of the booth. It contained trace amounts of a clear liquid. Sent to the lab. Preliminary field test suggests an organic compound — possibly glycoside-based. The cap had been removed and not replaced.",
-      "unlockParagraph": 4,
-      "importance": "critical"
+      "id": "evidence-solvent-residue",
+      "name": "Solvent Residue on Railing",
+      "description": "Residue consistent with industrial solvent was found on the stairwell railing near the second floor. The substance is used in both marine equipment maintenance and structural engineering work.",
+      "superficiallyImplicates": "suspect-nadia-soren",
+      "innocentExplanation": "My firm uses that solvent for cleaning drafting equipment. But so does anyone who works with marine engines. Joel coordinates fleet maintenance — ask him what he had on his hands that night.",
+      "trueSequenceOfEvents": "Joel Maret had been cleaning marine engine parts earlier that day. Residual solvent remained on his hands. When he grabbed the stairwell railing after shoving Hollis, he transferred the residue. The solvent implicates Nadia on the surface because her profession uses it, but it actually came from Joel."
     },
     {
-      "id": "evidence-envelope",
-      "title": "Sealed Envelope",
-      "description": "Found inside Veil's briefcase at the coat check, addressed by hand to a named federal prosecutor. The envelope has not been opened — it is being treated as potential evidence. It is unknown when it was prepared or what it contains.",
-      "unlockParagraph": 4,
-      "importance": "high"
+      "id": "evidence-thermos",
+      "name": "Dented Steel Thermos",
+      "description": "A steel thermos belonging to Hollis was found on the stairwell landing where he fell. It was dented and empty. Hollis's fingerprints are on it. No other prints were recovered.",
+      "superficiallyImplicates": "suspect-joel-maret",
+      "innocentExplanation": "The thermos was on his desk when we were talking. He was drinking from it. I never touched it. I do not know how it got to the stairwell.",
+      "trueSequenceOfEvents": "Hollis carried the thermos with him when he followed Joel into the stairwell, still drinking from it while pressing the job offer. When Joel shoved him and he went over the railing, the thermos fell from his hand and landed on the same level. Its presence on the landing proves Hollis was in the stairwell voluntarily, not dragged there."
     },
     {
-      "id": "evidence-wiped-phone",
-      "title": "Factory-Reset Phone",
-      "description": "Veil's personal phone was found on the table beside him, wiped to factory settings. The wipe timestamp has not been recovered. Forensics are examining whether any data can be retrieved from flash storage. The reset appears to have been performed within the last two hours before discovery.",
-      "unlockParagraph": 1,
-      "importance": "medium"
+      "id": "evidence-overturned-chair",
+      "name": "Overturned Office Chair",
+      "description": "Hollis's office chair was found knocked sideways on the second floor. The desk was undisturbed. There were no other signs of a struggle in the office itself.",
+      "superficiallyImplicates": "suspect-joel-maret",
+      "innocentExplanation": "The chair got knocked over during the conversation. I stood up too fast when he said something about my crew. I did not touch him. The desk is fine — look at it. If there had been a fight, more would be broken.",
+      "trueSequenceOfEvents": "During the meeting, Hollis made a dismissive remark about Joel's former crew. Joel stood up abruptly, knocking Hollis's chair backward. There was no physical contact at this point. The confrontation that led to the fall happened later, in the stairwell, not in the office."
+    },
+    {
+      "id": "evidence-propped-door",
+      "name": "Propped Stairwell Door",
+      "description": "The second-floor stairwell door was found propped open with a fire extinguisher. The door is equipped with an automatic closer and would normally shut on its own.",
+      "superficiallyImplicates": "suspect-joel-maret",
+      "innocentExplanation": "I propped it open when I came in. The lock sticks. It is an old building. I have done that in every dockside building I have worked in. It is not evidence of anything.",
+      "trueSequenceOfEvents": "Joel propped the door open on arrival as a practical habit. This detail is innocent in itself but creates opportunity — the open door is how Hollis followed Joel into the stairwell for the final confrontation. Without the propped door, Hollis might not have pursued Joel into the stairwell."
+    },
+    {
+      "id": "evidence-forearm-bruise",
+      "name": "Forearm Bruise",
+      "description": "Hollis had a bruise on his right forearm that the medical examiner says is inconsistent with the fall itself. The bruise pattern suggests a grip or impact from a blunt surface, sustained shortly before death.",
+      "superficiallyImplicates": "suspect-joel-maret",
+      "innocentExplanation": "I did not grab him. I did not touch him. Maybe he hit the railing when he fell. Maybe he bumped into something earlier. I was not the only person in that building.",
+      "trueSequenceOfEvents": "When Joel shoved Hollis on the stairwell landing, Hollis instinctively grabbed the railing with his right arm. The bruise was caused by the impact of his forearm against the metal railing as his grip failed and he went over. This is the most direct physical evidence of the shove, but Joel's explanation — that it could have come from the fall itself — is superficially plausible."
     }
   ],
   "timeline": [
     {
-      "time": "9:30 PM",
-      "who": ["victim-marcus-veil"],
-      "where": "Meridian Bar — main entrance",
-      "what": "Veil arrives alone. He requests the private booth and orders Scotch. He places his briefcase in the coat check.",
+      "time": "10:52 PM",
+      "who": ["suspect-nadia-soren"],
+      "where": "Building entrance",
+      "what": "Nadia badges in at the main entrance and goes to her third-floor office.",
       "visibility": "public"
     },
     {
-      "time": "9:45 PM",
-      "who": ["suspect-diane-holst"],
-      "where": "Meridian Bar — entrance",
-      "what": "Diane Holst arrives. The doorman logs her entry. She orders a gin and tonic at the bar, then moves to Veil's booth.",
+      "time": "11:15 PM",
+      "who": ["suspect-joel-maret"],
+      "where": "Building entrance",
+      "what": "Joel enters using a guest pass issued by Hollis. He goes to Hollis's second-floor office. He props the stairwell door open with a fire extinguisher on his way up.",
       "visibility": "public"
     },
     {
-      "time": "9:55 PM",
-      "who": ["suspect-owen-rask"],
-      "where": "Meridian Bar — entrance",
-      "what": "Owen Rask arrives. He goes directly to the booth, delivers a sealed folder to Veil, exchanges fewer than five words, and leaves.",
-      "visibility": "public"
-    },
-    {
-      "time": "10:02 PM",
-      "who": ["suspect-diane-holst", "victim-marcus-veil"],
-      "where": "Meridian Bar — private booth",
-      "what": "Diane slips a compound from the vial into Veil's Scotch glass during the argument, using the motion of reaching across the table as cover. The vial is knocked to the cushion beneath her when she pulls her hand back.",
+      "time": "11:15 PM – 12:00 AM",
+      "who": ["suspect-joel-maret", "victim-ray-hollis"],
+      "where": "Second-floor office",
+      "what": "Joel and Hollis discuss the fleet coordinator position. The conversation is tense. Joel knocks over Hollis's chair during a heated exchange. No physical contact occurs.",
       "visibility": "hidden"
     },
     {
-      "time": "10:10 PM",
-      "who": ["victim-marcus-veil"],
-      "where": "Meridian Bar — private booth",
-      "what": "Veil, unaware, drinks from the glass. He continues reviewing documents at the table.",
+      "time": "11:50 PM",
+      "who": ["suspect-nadia-soren"],
+      "where": "Rooftop terrace",
+      "what": "Nadia goes to the rooftop to smoke. She steps through standing water near the drainage grate, leaving wet boot prints when she returns to the third floor.",
       "visibility": "hidden"
     },
     {
-      "time": "10:30 PM",
-      "who": ["suspect-diane-holst"],
-      "where": "Meridian Bar — exit",
-      "what": "Diane leaves the bar. The doorman logs her exit. She does not retrieve anything from the coat check.",
+      "time": "12:10 AM",
+      "who": ["suspect-nadia-soren"],
+      "where": "Stairwell, passing second floor",
+      "what": "Nadia comes down from the rooftop. She hears raised voices and furniture scraping from the second floor. She sees the propped-open door but does not look inside. She continues down and exits the stairwell at the ground floor.",
+      "visibility": "hidden"
+    },
+    {
+      "time": "12:30 AM",
+      "who": ["suspect-nadia-soren"],
+      "where": "Building entrance",
+      "what": "Nadia badges out.",
       "visibility": "public"
     },
     {
-      "time": "10:55 PM",
-      "who": ["victim-marcus-veil"],
-      "where": "Meridian Bar — private booth",
-      "what": "Veil's condition deteriorates. He uses his phone to wipe it before losing consciousness — the last action he takes.",
+      "time": "1:00 AM",
+      "who": ["suspect-joel-maret", "victim-ray-hollis"],
+      "where": "Second-floor stairwell landing",
+      "what": "Joel leaves Hollis's office. Hollis follows him into the stairwell, still pressing the job offer. Joel turns and shoves Hollis. Hollis hits the railing, his forearm bruises on impact, and he falls two stories. Joel hears the impact. He stands on the landing for thirty seconds, then walks down and leaves without checking on Hollis.",
       "visibility": "hidden"
     },
     {
-      "time": "11:22 PM",
+      "time": "1:10 AM",
+      "who": ["suspect-joel-maret"],
+      "where": "Building entrance",
+      "what": "Joel badges out.",
+      "visibility": "public"
+    },
+    {
+      "time": "6:14 AM",
       "who": [],
-      "where": "Meridian Bar — private booth",
-      "what": "A staff member checks on the booth after a long period of silence and finds Veil unresponsive. Emergency services are called.",
+      "where": "Ground-floor stairwell",
+      "what": "A maintenance worker discovers Hollis's body at the base of the service stairwell. Emergency services are called.",
       "visibility": "public"
     }
   ],
-  "truth": {
-    "murdererId": "suspect-diane-holst",
-    "motive": "Veil's current fraud bureau investigation was tracing misappropriated funds to an offshore account in Diane's name — an account created during their partnership. If his findings reached the prosecutor, she would be criminally charged. She had known this for weeks and had been researching how to act.",
-    "weapon": "Cardiac glycoside compound — a fast-acting poison that mimics natural cardiac arrest, administered via Veil's drink.",
-    "causeOfDeath": "Cardiac arrest induced by poisoning. The compound acts within 45–90 minutes of ingestion, making the timing consistent with Diane's departure and Veil's deterioration.",
-    "coverUp": "Diane counted on the CCTV blind spot in the booth section. She knew from a prior visit that the camera covering that area had a recurring overwrite issue — she had mentioned it to the bar manager months ago and he had never fixed it. She wore no distinctive jewelry that night and paid cash.",
-    "explanation": "Diane poisoned Veil's drink during their argument, using the reach across the table as cover. The vial slipped from her grip in the dark and fell to the cushion. She could not retrieve it without drawing attention. She left believing Veil would be found hours later — long after she was home. She did not account for the napkin falling under the table or for Rask's surveillance photos potentially identifying her.",
-    "clueBreakdown": [
-      "The vial: lab analysis will identify the glycoside compound. Diane's discarded work computer contains browser searches for the same compound class from six months prior.",
-      "The cocktail napkin: the partial account numbers match the offshore account linked to Diane. The handwriting is hers — written during the argument as she tried to show Veil she knew what he had found.",
-      "Rask's surveillance report: contains photographs of Diane meeting with the fraud bureau's target. She is identifiable in at least two images, which Rask did not know at the time. This places her inside the fraud network Veil was exposing.",
-      "The sealed envelope: contains a draft summary of Veil's findings, including account trace documentation. The federal prosecutor will receive it regardless — it was Veil's contingency."
-    ]
-  },
-  "difficulty": "medium"
+  "suspectAccountedLocations": [
+    {
+      "hour": "10:00 PM – 11:00 PM",
+      "locations": {
+        "suspect-nadia-soren": "Third-floor office (arrived 10:52 PM, working on project files)",
+        "suspect-joel-maret": "Not yet in building (arrives 11:15 PM)"
+      }
+    },
+    {
+      "hour": "11:00 PM – 12:00 AM",
+      "locations": {
+        "suspect-nadia-soren": "Third-floor office (claims she was working the entire time)",
+        "suspect-joel-maret": "Second-floor office with Hollis (confirmed by both)"
+      }
+    },
+    {
+      "hour": "12:00 AM – 1:00 AM",
+      "locations": {
+        "suspect-nadia-soren": "Claims she was finishing up on the third floor and left at 12:30 AM. Does not mention the rooftop or passing the second floor.",
+        "suspect-joel-maret": "Claims he was still in Hollis's office until approximately 1:00 AM, then left directly. Hollis was alive at his desk when Joel walked out."
+      }
+    }
+  ],
+  "murdererId": "suspect-joel-maret"
 }
