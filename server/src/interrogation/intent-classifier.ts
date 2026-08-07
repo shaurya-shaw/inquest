@@ -1,10 +1,8 @@
-import { GoogleGenAI } from "@google/genai";
+import { getAI } from "./ai-client.js";
 import type { IntentType } from "./types.js";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY ?? "" });
-
 // Classifier model — lightweight, fast, cheap
-const CLASSIFIER_MODEL = "gemini-2.0-flash-lite";
+const CLASSIFIER_MODEL = "gemini-3.5-flash-lite";
 
 const SYSTEM_PROMPT = `You are an intent classifier for a detective interrogation game.
 Classify the player's message into exactly one of these categories:
@@ -27,6 +25,7 @@ export async function classifyIntent(
   resolvedMessage: string,
 ): Promise<Exclude<IntentType, "evidence">> {
   try {
+    const ai = getAI();
     const response = await ai.models.generateContent({
       model: CLASSIFIER_MODEL,
       contents: resolvedMessage,
@@ -39,7 +38,9 @@ export async function classifyIntent(
     }
 
     // Fallback if the model returns something unexpected
-    console.warn(`[IntentClassifier] Unexpected response: "${text}" — falling back to "general"`);
+    console.warn(
+      `[IntentClassifier] Unexpected response: "${text}" — falling back to "general"`,
+    );
     return "general";
   } catch (err) {
     console.error("[IntentClassifier] API call failed:", err);

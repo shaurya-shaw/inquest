@@ -1,12 +1,9 @@
-import { GoogleGenAI } from "@google/genai";
-
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY ?? "" });
+import { getAI } from "./ai-client.js";
 
 /**
  * Model name for the main suspect LLM.
- * Left empty intentionally — configure this when you decide the model.
  */
-const MODEL_NAME = "";
+const MODEL_NAME = "gemini-2.5-flash";
 
 /**
  * Generates a suspect's in-character response to the player's message.
@@ -25,6 +22,7 @@ export async function generateSuspectResponse(
     );
   }
 
+  const ai = getAI();
   const response = await ai.models.generateContent({
     model: MODEL_NAME,
     contents: playerMessage,

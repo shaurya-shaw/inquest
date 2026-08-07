@@ -1,8 +1,7 @@
-import { GoogleGenAI } from "@google/genai";
+import { getAI } from "./ai-client.js";
 import type { SuspectSessionState } from "./types.js";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY ?? "" });
-const COMPRESSION_MODEL = "gemini-2.0-flash-lite";
+const COMPRESSION_MODEL = "gemini-3.5-flash-lite";
 
 // In-memory session store: "${roomId}:${playerId}" → SuspectSessionState
 const sessions = new Map<string, SuspectSessionState>();
@@ -66,7 +65,10 @@ export function deleteRoomSessions(roomId: string): void {
 export async function compressHistoryIfNeeded(
   session: SuspectSessionState,
 ): Promise<void> {
-  if (session.turnCount % COMPRESSION_INTERVAL !== 0 || session.turnCount === 0) {
+  if (
+    session.turnCount % COMPRESSION_INTERVAL !== 0 ||
+    session.turnCount === 0
+  ) {
     return;
   }
 
@@ -77,7 +79,9 @@ export async function compressHistoryIfNeeded(
   if (olderMessages.length === 0) return;
 
   const historyText = olderMessages
-    .map((m) => `${m.role === "player" ? "Detective" : "Suspect"}: ${m.content}`)
+    .map(
+      (m) => `${m.role === "player" ? "Detective" : "Suspect"}: ${m.content}`,
+    )
     .join("\n");
 
   const compressionPrompt =
@@ -86,6 +90,7 @@ export async function compressHistoryIfNeeded(
     `Be neutral and concise:\n\n${historyText}`;
 
   try {
+    const ai = getAI();
     const response = await ai.models.generateContent({
       model: COMPRESSION_MODEL,
       contents: compressionPrompt,
@@ -96,7 +101,9 @@ export async function compressHistoryIfNeeded(
     // Keep only the recent messages in the full history
     session.messages = recentMessages;
 
-    console.log(`[SessionManager] Compressed history for ${session.playerId} (${olderMessages.length} messages → summary)`);
+    console.log(
+      `[SessionManager] Compressed history for ${session.playerId} (${olderMessages.length} messages → summary)`,
+    );
   } catch (err) {
     console.error("[SessionManager] History compression failed:", err);
     // Don't fail the request — just keep full history
