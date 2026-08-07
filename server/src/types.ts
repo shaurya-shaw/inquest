@@ -16,6 +16,7 @@ export interface PublicPlayer {
 type RoomPhase =
   | "LOBBY"
   | "INVESTIGATION"
+  | "INTERROGATION"
   | "DISCUSSION"
   | "VOTING"
   | "RESULTS"
@@ -34,7 +35,12 @@ export interface Room {
   phaseStartedAt: number | null;
   /** Max investigation duration in seconds */
   phaseDuration: number | null;
+  /** playerId → suspectId assignments (set when INTERROGATION starts) */
+  suspectAssignments?: Record<string, string>;
+  /** Full case file cached after first load — used by interrogation pipeline */
+  caseFile?: CaseFile;
 }
+
 
 export interface PublicRoom {
   roomId: string;
@@ -221,4 +227,3 @@ export interface PublicCaseData {
   /** Only events with visibility: "public" */
   timeline: CaseTimelineEvent[];
 }
-
