@@ -10,6 +10,10 @@ import {
   MIN_INVESTIGATION_TIME,
 } from "./investigation-config.js";
 import { loadCaseFile, getPublicCaseData } from "./case-loader.js";
+import {
+  registerInterrogationHandlers,
+  startInterrogation,
+} from "./interrogation/handler.js";
 
 config();
 
@@ -413,19 +417,27 @@ io.on("connection", (socket) => {
 
     // Load the selected case file and build the public payload
     if (!room.caseId) {
-      socket.emit("error", { message: "No case selected. Please select a case before starting." });
+      socket.emit("error", {
+        message: "No case selected. Please select a case before starting.",
+      });
       return;
     }
 
     let publicCaseData;
+    let loadedCaseFile;
     try {
-      const caseFile = loadCaseFile(room.caseId);
-      publicCaseData = getPublicCaseData(caseFile);
+      loadedCaseFile = loadCaseFile(room.caseId);
+      publicCaseData = getPublicCaseData(loadedCaseFile);
     } catch (err) {
       console.error(`Failed to load case "${room.caseId}":`, err);
-      socket.emit("error", { message: `Case file "${room.caseId}" could not be loaded.` });
+      socket.emit("error", {
+        message: `Case file "${room.caseId}" could not be loaded.`,
+      });
       return;
     }
+
+    // Cache the full case file on the room for the interrogation pipeline
+    room.caseFile = loadedCaseFile;
 
     // Initialise investigation phase state
     room.phase = "INVESTIGATION";
@@ -441,11 +453,17 @@ io.on("connection", (socket) => {
       const currentRoom = rooms.get(roomId);
       if (!currentRoom || currentRoom.phase !== "INVESTIGATION") return;
 
-      console.log(`Room ${roomId}: max investigation timer expired — transitioning to DISCUSSION`);
-      currentRoom.phase = "DISCUSSION";
+      console.log(
+        `Room ${roomId}: max investigation timer expired — transitioning to DISCUSSION`,
+      );
+      currentRoom.phase = "INTERROGATION";
       currentRoom.readyPlayers = [];
       investigationTimers.delete(roomId);
       io.to(roomId).emit("room-updated", serializeRoom(currentRoom));
+      // Start interrogation — assign suspects and create sessions
+      if (currentRoom.caseFile) {
+        startInterrogation(io, roomId, currentRoom.caseFile);
+      }
     }, MAX_INVESTIGATION_TIME * 1000);
 
     investigationTimers.set(roomId, maxTimer);
@@ -454,7 +472,9 @@ io.on("connection", (socket) => {
     // before the phase transition renders InvestigationPage
     io.to(roomId).emit("case-data", publicCaseData);
     io.to(roomId).emit("room-updated", serializeRoom(room));
-    console.log(`Investigation started in room ${roomId} with case "${room.caseId}"`);
+    console.log(
+      `Investigation started in room ${roomId} with case "${room.caseId}"`,
+    );
   });
 
   socket.on("detective-ready", () => {
@@ -494,17 +514,21 @@ io.on("connection", (socket) => {
     // Idempotent — prevent duplicate entries
     if (!room.readyPlayers.includes(playerId)) {
       room.readyPlayers.push(playerId);
-      console.log(`Room ${roomId}: player ${playerId} is ready (${room.readyPlayers.length}/${room.players.length})`);
+      console.log(
+        `Room ${roomId}: player ${playerId} is ready (${room.readyPlayers.length}/${room.players.length})`,
+      );
     }
 
     // Check if every connected player is ready
     const connectedPlayers = room.players.filter((p) => p.connected);
     const allReady = connectedPlayers.every((p) =>
-      room.readyPlayers.includes(p.playerId)
+      room.readyPlayers.includes(p.playerId),
     );
 
     if (allReady && connectedPlayers.length > 0) {
-      console.log(`Room ${roomId}: all detectives ready — transitioning to DISCUSSION`);
+      console.log(
+        `Room ${roomId}: all detectives ready — transitioning to INTERROGATION`,
+      );
 
       // Clear the max-timer since we're transitioning early
       const timer = investigationTimers.get(roomId);
@@ -513,15 +537,22 @@ io.on("connection", (socket) => {
         investigationTimers.delete(roomId);
       }
 
-      room.phase = "DISCUSSION";
+      room.phase = "INTERROGATION";
       room.readyPlayers = [];
       io.to(roomId).emit("room-updated", serializeRoom(room));
+      // Start interrogation — assign suspects and create sessions
+      if (room.caseFile) {
+        startInterrogation(io, roomId, room.caseFile);
+      }
       return;
     }
 
     // Not everyone ready yet — broadcast updated ready list
     io.to(roomId).emit("room-updated", serializeRoom(room));
   });
+
+  // ── Interrogation pipeline ────────────────────────────────────────────────
+  registerInterrogationHandlers(io, socket);
 });
 
 httpServer.listen(process.env.PORT || 5000, () => {
