@@ -3,6 +3,7 @@ import { create } from "zustand";
 type RoomPhase =
   | "LOBBY"
   | "INVESTIGATION"
+  | "INTERROGATION"
   | "DISCUSSION"
   | "VOTING"
   | "RESULTS"
