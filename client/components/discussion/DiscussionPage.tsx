@@ -30,10 +30,16 @@ export default function DiscussionPage() {
       setMessages((prev) => [...prev, message]);
     };
 
+    const handleHistory = (history: DiscussionMessage[]) => {
+      setMessages(history);
+    };
+
     socket.on("discussion-message", handleIncomingMessage);
+    socket.on("discussion-history", handleHistory);
 
     return () => {
       socket.off("discussion-message", handleIncomingMessage);
+      socket.off("discussion-history", handleHistory);
     };
   }, []);
 

@@ -4,7 +4,7 @@ import { Server, type Socket } from "socket.io";
 import { config } from "dotenv";
 import { generateRoomCode } from "./utils.js";
 import { rooms, playerRoomMap } from "./rooms.js";
-import type { PublicRoom, Room } from "./types.js";
+import type { PublicRoom, Room, DiscussionMessage } from "./types.js";
 import {
   MAX_INVESTIGATION_TIME,
   MIN_INVESTIGATION_TIME,
@@ -16,6 +16,7 @@ import {
   startDiscussionTimer,
   clearDiscussionTimer,
 } from "./interrogation/handler.js";
+import { getSession } from "./interrogation/session-manager.js";
 
 config();
 
@@ -227,13 +228,19 @@ io.on("connection", (socket) => {
 
     const sender = room.players.find((entry) => entry.playerId === playerId);
 
-    io.to(roomId).emit("discussion-message", {
+    if (!room.discussionMessages) {
+      room.discussionMessages = [];
+    }
+    const discussionMsg: DiscussionMessage = {
       id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
       playerId,
       playerName: sender?.name ?? "Unknown Detective",
       content: text,
       timestamp: Date.now(),
-    });
+    };
+    room.discussionMessages.push(discussionMsg);
+
+    io.to(roomId).emit("discussion-message", discussionMsg);
   });
 
   socket.on("create-room", ({ name, maxInvestigators, caseId, playerId }) => {
@@ -329,7 +336,68 @@ io.on("connection", (socket) => {
 
     console.log(`User rejoined room ${roomId}: ${player.name}`);
 
+    // Broadcast updated player list to all players in the room
     io.to(roomId).emit("room-updated", serializeRoom(room));
+
+    // Re-hydrate the reconnecting player with full phase-appropriate state
+    if (room.phase === "INVESTIGATION" && room.caseFile) {
+      socket.emit("case-data", getPublicCaseData(room.caseFile));
+    } else if (room.phase === "INTERROGATION" && room.caseFile) {
+      // 1. Re-send public case data (story, suspects, evidence)
+      socket.emit("case-data", getPublicCaseData(room.caseFile));
+
+      // 2. Re-send suspect assignment for this player, if they have one
+      const suspectId = room.suspectAssignments?.[playerId];
+      if (suspectId) {
+        const suspect = room.caseFile.suspects.find((s) => s.id === suspectId);
+        if (suspect) {
+          socket.emit("suspect-assignment", {
+            suspectId: suspect.id,
+            suspectName: suspect.name,
+            avatarUrl: suspect.avatarUrl,
+            evidence: room.caseFile.evidenceCatalog.map((e) => ({
+              id: e.id,
+              name: e.name,
+              description: e.description,
+            })),
+          });
+
+          // 3. Re-send live session state (metrics + conversation)
+          const session = getSession(roomId, playerId);
+          if (session) {
+            socket.emit("interrogation-state-restore", {
+              suspectId: session.suspectId,
+              trust: session.trust,
+              pressure: session.pressure,
+              composure: session.composure,
+              evidencePresented: session.evidencePresented,
+              messages: session.messages,
+            });
+          }
+        }
+      }
+    } else if (
+      (room.phase === "DISCUSSION" || room.phase === "RESULTS") &&
+      room.caseFile
+    ) {
+      // 1. Re-send public case data (needed for VotingArea suspect list)
+      socket.emit("case-data", getPublicCaseData(room.caseFile));
+
+      // 2. Re-send discussion chat history (DISCUSSION only)
+      if (room.phase === "DISCUSSION" && room.discussionMessages) {
+        socket.emit("discussion-history", room.discussionMessages);
+      }
+
+      // 3. Re-send vote status so the UI reflects who has already voted
+      if (room.votes) {
+        const votedPlayers = Array.from(room.votes.keys());
+        socket.emit("vote-status-updated", {
+          votedPlayers,
+          voteCount: votedPlayers.length,
+          totalPlayers: room.players.filter((p) => p.connected).length,
+        });
+      }
+    }
   });
 
   socket.on("disconnect", () => {
@@ -500,6 +568,8 @@ io.on("connection", (socket) => {
         `Room ${roomId}: max investigation timer expired — transitioning to DISCUSSION`,
       );
       currentRoom.phase = "INTERROGATION";
+      currentRoom.phaseStartedAt = Date.now();
+      currentRoom.phaseDuration = 5 * 60;
       currentRoom.readyPlayers = [];
       investigationTimers.delete(roomId);
       io.to(roomId).emit("room-updated", serializeRoom(currentRoom));
@@ -581,6 +651,8 @@ io.on("connection", (socket) => {
       }
 
       room.phase = "INTERROGATION";
+      room.phaseStartedAt = Date.now();
+      room.phaseDuration = 5 * 60;
       room.readyPlayers = [];
       io.to(roomId).emit("room-updated", serializeRoom(room));
       // Start interrogation — assign suspects and create sessions

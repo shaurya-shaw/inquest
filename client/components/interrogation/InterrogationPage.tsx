@@ -22,14 +22,31 @@ export default function InterrogationPage() {
   const endInterrogation = useInterrogationStore((s) => s.endInterrogation);
   const resetInterrogation = useInterrogationStore((s) => s.resetInterrogation);
 
+  const restoreInterrogation = useInterrogationStore(
+    (s) => s.restoreInterrogation,
+  );
+
   // Socket event listeners
   useEffect(() => {
     const handleAssignment = (data: {
       suspectId: string;
       suspectName: string;
+      avatarUrl?: string;
       evidence: Array<{ id: string; name: string; description: string }>;
     }) => {
       setSuspectAssignment(data);
+      startTimer();
+    };
+
+    const handleRestore = (data: {
+      suspectId: string;
+      trust: number;
+      pressure: number;
+      composure: number;
+      evidencePresented: string[];
+      messages: Array<{ role: "player" | "suspect"; content: string }>;
+    }) => {
+      restoreInterrogation(data);
       startTimer();
     };
 
@@ -51,24 +68,25 @@ export default function InterrogationPage() {
     };
 
     socket.on("suspect-assignment", handleAssignment);
+    socket.on("interrogation-state-restore", handleRestore);
     socket.on("interrogation-response", handleResponse);
     socket.on("suspect-state-update", handleStateUpdate);
     socket.on("interrogation-ended", handleEnded);
 
     return () => {
       socket.off("suspect-assignment", handleAssignment);
+      socket.off("interrogation-state-restore", handleRestore);
       socket.off("interrogation-response", handleResponse);
       socket.off("suspect-state-update", handleStateUpdate);
       socket.off("interrogation-ended", handleEnded);
-      resetInterrogation();
     };
   }, [
     setSuspectAssignment,
+    restoreInterrogation,
     addSuspectMessage,
     updateMetrics,
     startTimer,
     endInterrogation,
-    resetInterrogation,
   ]);
 
   // Loading state — waiting for suspect assignment

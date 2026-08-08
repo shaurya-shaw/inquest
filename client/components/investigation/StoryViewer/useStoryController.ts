@@ -8,6 +8,7 @@ import {
 
 interface UseStoryControllerOptions {
   paragraphs: string[];
+  caseId?: string;
   /** Called when auto-scroll should occur (currentIndex changed while playing) */
   onIndexChange?: (index: number) => void;
 }
@@ -24,13 +25,14 @@ interface UseStoryControllerReturn extends StoryControllerState {
 
 export function useStoryController({
   paragraphs,
+  caseId,
   onIndexChange,
 }: UseStoryControllerOptions): UseStoryControllerReturn {
   // Stable controller instance — never recreated
   const controllerRef = useRef<StoryController | null>(null);
 
   if (controllerRef.current === null) {
-    controllerRef.current = new StoryController(paragraphs);
+    controllerRef.current = new StoryController(paragraphs, caseId);
   }
 
   const controller = controllerRef.current;

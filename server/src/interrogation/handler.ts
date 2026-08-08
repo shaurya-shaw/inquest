@@ -89,6 +89,11 @@ export function startInterrogation(
   const room = rooms.get(roomId);
   if (!room) return;
 
+  if (!room.phaseStartedAt || room.phase !== "INTERROGATION") {
+    room.phaseStartedAt = Date.now();
+  }
+  room.phaseDuration = INTERROGATION_DURATION_SECONDS;
+
   const connectedPlayers = room.players.filter((p) => p.connected);
   const suspects = caseFile.suspects;
 
@@ -134,7 +139,7 @@ export function startInterrogation(
     io.to(player.socketId).emit("suspect-assignment", payload);
 
     // Start 5-minute timer for this player
-    startPlayerTimer(io, roomId, playerId, player.socketId);
+    startPlayerTimer(io, roomId, playerId);
   }
 }
 
@@ -142,17 +147,24 @@ function startPlayerTimer(
   io: Server,
   roomId: string,
   playerId: string,
-  socketId: string,
 ): void {
   const key = `${roomId}:${playerId}`;
+  const room = rooms.get(roomId);
+  const elapsedMs = room?.phaseStartedAt ? Date.now() - room.phaseStartedAt : 0;
+  const remainingMs = Math.max(0, INTERROGATION_DURATION_SECONDS * 1000 - elapsedMs);
+
   const timer = setTimeout(() => {
     interrogationTimers.delete(key);
-    io.to(socketId).emit("interrogation-ended", { reason: "timeout" });
+    const currentRoom = rooms.get(roomId);
+    const currentPlayer = currentRoom?.players.find((p) => p.playerId === playerId);
+    if (currentPlayer) {
+      io.to(currentPlayer.socketId).emit("interrogation-ended", { reason: "timeout" });
+    }
     console.log(`[Interrogation] Timer expired for player ${playerId} in room ${roomId}`);
 
     // Check if all players are done
     checkAllDone(io, roomId, playerId);
-  }, INTERROGATION_DURATION_SECONDS * 1000);
+  }, remainingMs);
 
   interrogationTimers.set(key, timer);
 }

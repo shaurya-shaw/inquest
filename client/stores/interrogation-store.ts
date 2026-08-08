@@ -72,6 +72,15 @@ interface InterrogationState {
   startTimer: () => void;
   endInterrogation: () => void;
   resetInterrogation: () => void;
+  /** Bulk-restore session state from the server after a browser refresh */
+  restoreInterrogation: (state: {
+    suspectId: string;
+    trust: number;
+    pressure: number;
+    composure: number;
+    evidencePresented: string[];
+    messages: Array<{ role: "player" | "suspect"; content: string }>;
+  }) => void;
 }
 
 let messageCounter = 0;
@@ -143,6 +152,26 @@ export const useInterrogationStore = create<InterrogationState>((set) => ({
   startTimer: () => set({ interrogationStartedAt: Date.now() }),
 
   endInterrogation: () => set({ interrogationEnded: true }),
+
+  restoreInterrogation: (serverState) => {
+    const now = Date.now();
+    set((state) => ({
+      suspectId: state.suspectId || serverState.suspectId,
+      trust: serverState.trust,
+      pressure: serverState.pressure,
+      composure: serverState.composure,
+      presentedEvidenceIds: serverState.evidencePresented,
+      // Reconstruct display messages from raw role/content pairs.
+      // Assign synthetic timestamps spaced 1 s apart ending at now so
+      // the chat renders in the correct order without real timestamps.
+      messages: serverState.messages.map((m, i) => ({
+        id: `restored-${i}`,
+        role: m.role,
+        content: m.content,
+        timestamp: now - (serverState.messages.length - i) * 1000,
+      })),
+    }));
+  },
 
   resetInterrogation: () => {
     messageCounter = 0;

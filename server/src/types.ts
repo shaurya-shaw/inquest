@@ -6,6 +6,15 @@ export interface Player {
   connected: boolean;
 }
 
+/** A single message in the DISCUSSION phase chat, cached on the Room for reconnect */
+export interface DiscussionMessage {
+  id: string;
+  playerId: string;
+  playerName: string;
+  content: string;
+  timestamp: number;
+}
+
 export interface PublicPlayer {
   playerId: string;
   name: string;
@@ -41,6 +50,8 @@ export interface Room {
   caseFile?: CaseFile;
   /** Map of playerId → suspectId votes (null if player didn't vote before timer expired) */
   votes?: Map<string, string | null>;
+  /** In-memory DISCUSSION chat log — replayed to reconnecting players */
+  discussionMessages?: DiscussionMessage[];
 }
 
 

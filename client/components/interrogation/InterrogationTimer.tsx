@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
+import { useRoomStore } from "@/stores/room-store";
 import { useInterrogationStore } from "@/stores/interrogation-store";
 
 const INTERROGATION_DURATION = 5 * 60; // 5 minutes in seconds
@@ -14,17 +15,21 @@ function formatTime(seconds: number): string {
 }
 
 export default function InterrogationTimer() {
-  const startedAt = useInterrogationStore((s) => s.interrogationStartedAt);
+  const { phaseStartedAt, phaseDuration } = useRoomStore();
+  const interrogationStartedAt = useInterrogationStore((s) => s.interrogationStartedAt);
   const ended = useInterrogationStore((s) => s.interrogationEnded);
   const [remaining, setRemaining] = useState(INTERROGATION_DURATION);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
-    if (!startedAt || ended) return;
+    const startTime = phaseStartedAt || interrogationStartedAt;
+    const duration = phaseDuration || INTERROGATION_DURATION;
+
+    if (!startTime || ended) return;
 
     const tick = () => {
-      const elapsed = (Date.now() - startedAt) / 1000;
-      setRemaining(Math.max(0, INTERROGATION_DURATION - elapsed));
+      const elapsed = (Date.now() - startTime) / 1000;
+      setRemaining(Math.max(0, duration - elapsed));
     };
 
     tick();
@@ -33,7 +38,7 @@ export default function InterrogationTimer() {
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [startedAt, ended]);
+  }, [phaseStartedAt, interrogationStartedAt, phaseDuration, ended]);
 
   const isUrgent = remaining <= 30;
   const isLow = remaining <= 60;

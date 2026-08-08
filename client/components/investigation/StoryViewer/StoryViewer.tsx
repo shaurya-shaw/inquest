@@ -63,7 +63,11 @@ export default function StoryViewer({
     mute,
     unmute,
     markTypewriterDone,
-  } = useStoryController({ paragraphs, onIndexChange: handleIndexChange });
+  } = useStoryController({
+    paragraphs,
+    caseId,
+    onIndexChange: handleIndexChange,
+  });
 
   // No auto-transition here — the server's main timer is the sole source of truth.
 

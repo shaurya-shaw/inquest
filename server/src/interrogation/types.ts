@@ -57,3 +57,19 @@ export interface SuspectAssignmentPayload {
   avatarUrl?: string | undefined;
   evidence: Array<{ id: string; name: string; description: string }>;
 }
+
+/**
+ * Sent only to a reconnecting player during INTERROGATION phase.
+ * Contains the live session state needed to rebuild the UI — no hidden case data.
+ */
+export interface InterrogationStateRestorePayload {
+  suspectId: string;
+  trust: number;
+  pressure: number;
+  composure: number;
+  /** Evidence IDs this player has already presented */
+  evidencePresented: string[];
+  /** Full conversation turns in display order */
+  messages: Array<{ role: "player" | "suspect"; content: string }>;
+}
+

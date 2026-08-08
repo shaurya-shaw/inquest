@@ -13,6 +13,8 @@ import InterrogationPage from "@/components/interrogation/InterrogationPage";
 import DiscussionPage from "@/components/discussion/DiscussionPage";
 import ResultPage from "@/components/result/ResultPage";
 
+import { useInterrogationStore } from "@/stores/interrogation-store";
+
 export default function InvestigationRoom() {
   const {
     phase,
@@ -26,6 +28,8 @@ export default function InvestigationRoom() {
   const { playerId, isHost, resetPlayer, updatePlayer, hasHydrated } =
     usePlayerStore();
   const { setCaseData, resetCase } = useCaseStore();
+  const { setSuspectAssignment, restoreInterrogation, startTimer, resetInterrogation } =
+    useInterrogationStore();
   const router = useRouter();
   const params = useParams<{ roomId: string }>();
   const routeRoomId = useMemo(() => {
@@ -50,6 +54,30 @@ export default function InvestigationRoom() {
       console.log("Case data received:", data.story.title);
     };
 
+    const handleSuspectAssignment = (data: {
+      suspectId: string;
+      suspectName: string;
+      avatarUrl?: string;
+      evidence: Array<{ id: string; name: string; description: string }>;
+    }) => {
+      setSuspectAssignment(data);
+      startTimer();
+      console.log("Suspect assignment received:", data.suspectName);
+    };
+
+    const handleInterrogationRestore = (data: {
+      suspectId: string;
+      trust: number;
+      pressure: number;
+      composure: number;
+      evidencePresented: string[];
+      messages: Array<{ role: "player" | "suspect"; content: string }>;
+    }) => {
+      restoreInterrogation(data);
+      startTimer();
+      console.log("Interrogation state restored for suspect:", data.suspectId);
+    };
+
     const handleVoteStatusUpdated = ({
       votedPlayers,
     }: {
@@ -67,6 +95,7 @@ export default function InvestigationRoom() {
       resetRoom();
       resetPlayer();
       resetCase();
+      resetInterrogation();
 
       setTimeout(() => {
         router.push("/");
@@ -79,6 +108,7 @@ export default function InvestigationRoom() {
       resetRoom();
       resetPlayer();
       resetCase();
+      resetInterrogation();
 
       setTimeout(() => {
         router.push("/");
@@ -98,6 +128,8 @@ export default function InvestigationRoom() {
 
     socket.on("room-updated", handleRoomUpdated);
     socket.on("case-data", handleCaseData);
+    socket.on("suspect-assignment", handleSuspectAssignment);
+    socket.on("interrogation-state-restore", handleInterrogationRestore);
     socket.on("vote-status-updated", handleVoteStatusUpdated);
     socket.on("room-closed", handleRoomClosed);
     socket.on("error", handleError);
@@ -108,6 +140,8 @@ export default function InvestigationRoom() {
     return () => {
       socket.off("room-updated", handleRoomUpdated);
       socket.off("case-data", handleCaseData);
+      socket.off("suspect-assignment", handleSuspectAssignment);
+      socket.off("interrogation-state-restore", handleInterrogationRestore);
       socket.off("vote-status-updated", handleVoteStatusUpdated);
       socket.off("room-closed", handleRoomClosed);
       socket.off("error", handleError);
@@ -117,11 +151,15 @@ export default function InvestigationRoom() {
     hasHydrated,
     playerId,
     resetCase,
+    resetInterrogation,
     resetPlayer,
     resetRoom,
+    restoreInterrogation,
     routeRoomId,
     router,
     setCaseData,
+    setSuspectAssignment,
+    startTimer,
     updatePlayer,
     updateRoom,
   ]);

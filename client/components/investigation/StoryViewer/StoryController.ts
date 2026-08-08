@@ -23,10 +23,75 @@ export interface StoryControllerState {
   restartKey: number;
 }
 
+function getStorageKey(caseId?: string): string | null {
+  return caseId ? `inquest-story-progress-${caseId}` : null;
+}
+
+function loadSavedState(
+  caseId?: string,
+  paragraphsLength: number = 0,
+): StoryControllerState | null {
+  const key = getStorageKey(caseId);
+  if (!key || typeof window === "undefined") return null;
+
+  try {
+    const raw = sessionStorage.getItem(key);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (
+      typeof parsed?.currentIndex === "number" &&
+      typeof parsed?.revealedCount === "number" &&
+      typeof parsed?.phase === "string"
+    ) {
+      const currentIndex = Math.min(
+        Math.max(0, parsed.currentIndex),
+        Math.max(0, paragraphsLength - 1),
+      );
+      const revealedCount = Math.min(
+        Math.max(1, parsed.revealedCount),
+        paragraphsLength,
+      );
+      const phase: StoryPhase =
+        parsed.phase === "complete" ? "complete" : "playing";
+
+      return {
+        phase,
+        currentIndex,
+        isMuted: Boolean(parsed.isMuted),
+        revealedCount,
+        restartKey: 0,
+      };
+    }
+  } catch {
+    // Ignore parse errors
+  }
+  return null;
+}
+
+function saveState(caseId: string | undefined, state: StoryControllerState): void {
+  const key = getStorageKey(caseId);
+  if (!key || typeof window === "undefined") return;
+
+  try {
+    sessionStorage.setItem(
+      key,
+      JSON.stringify({
+        phase: state.phase,
+        currentIndex: state.currentIndex,
+        revealedCount: state.revealedCount,
+        isMuted: state.isMuted,
+      }),
+    );
+  } catch {
+    // Ignore storage quota errors
+  }
+}
+
 type Listener = (state: StoryControllerState) => void;
 
 export class StoryController {
   private paragraphs: string[];
+  private caseId?: string;
   private listeners: Set<Listener> = new Set();
 
   private state: StoryControllerState = {
@@ -46,8 +111,21 @@ export class StoryController {
   /** The currently-speaking utterance */
   private utterance: SpeechSynthesisUtterance | null = null;
 
-  constructor(paragraphs: string[]) {
+  constructor(paragraphs: string[], caseId?: string) {
     this.paragraphs = paragraphs;
+    this.caseId = caseId;
+
+    const saved = loadSavedState(caseId, paragraphs.length);
+    if (saved) {
+      this.state = saved;
+      if (saved.phase === "playing") {
+        setTimeout(() => {
+          if (this.state.phase === "playing") {
+            this.beginParagraph(saved.currentIndex);
+          }
+        }, 100);
+      }
+    }
   }
 
   // ─── Public API ────────────────────────────────────────────────────────────
@@ -143,6 +221,7 @@ export class StoryController {
 
   private setState(patch: Partial<StoryControllerState>): void {
     this.state = { ...this.state, ...patch };
+    saveState(this.caseId, this.state);
     this.listeners.forEach((l) => l(this.state));
   }
 
