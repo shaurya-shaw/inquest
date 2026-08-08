@@ -1,21 +1,17 @@
 "use client";
-import { useRouter } from "next/navigation";
 
+import { useRouter } from "next/navigation";
 import { socket } from "@/lib/socket";
-import { usePlayerStore } from "@/stores/player-store";
-import { useRoomStore } from "@/stores/room-store";
-import { motion } from "motion/react";
+import { clearGameSessionData } from "@/lib/session-cleanup";
+import { motion } from "framer-motion";
 import { useEffect } from "react";
 
 export default function AbortOperationBtn() {
   const router = useRouter();
-  const { resetPlayer } = usePlayerStore();
-  const { resetRoom } = useRoomStore();
 
   useEffect(() => {
     const handleLeftRoom = () => {
-      resetRoom();
-      resetPlayer();
+      clearGameSessionData();
       router.push("/");
     };
 
@@ -24,10 +20,11 @@ export default function AbortOperationBtn() {
     return () => {
       socket.off("left-room", handleLeftRoom);
     };
-  }, [resetPlayer, resetRoom, router]);
+  }, [router]);
 
   const handleAbortOperation = () => {
-    socket.emit("leave-room");
+    clearGameSessionData();
+    router.push("/");
   };
 
   return (

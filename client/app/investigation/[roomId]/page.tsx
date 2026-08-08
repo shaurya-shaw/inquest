@@ -14,6 +14,7 @@ import DiscussionPage from "@/components/discussion/DiscussionPage";
 import ResultPage from "@/components/result/ResultPage";
 
 import { useInterrogationStore } from "@/stores/interrogation-store";
+import { clearGameSessionData } from "@/lib/session-cleanup";
 
 export default function InvestigationRoom() {
   const {
@@ -89,13 +90,15 @@ export default function InvestigationRoom() {
       console.log("Vote status updated:", votedPlayers);
     };
 
+    const handleGameResults = (results: import("@/lib/case-types").GameResultsPayload) => {
+      useRoomStore.getState().setResultsData(results);
+      console.log("Game results received:", results);
+    };
+
     const handleRoomClosed = ({ message }: { message: string }) => {
       toast.error(message);
       setIsRejoining(false);
-      resetRoom();
-      resetPlayer();
-      resetCase();
-      resetInterrogation();
+      clearGameSessionData();
 
       setTimeout(() => {
         router.push("/");
@@ -105,10 +108,7 @@ export default function InvestigationRoom() {
     const handleError = ({ message }: { message: string }) => {
       toast.error(message);
       setIsRejoining(false);
-      resetRoom();
-      resetPlayer();
-      resetCase();
-      resetInterrogation();
+      clearGameSessionData();
 
       setTimeout(() => {
         router.push("/");
@@ -131,6 +131,7 @@ export default function InvestigationRoom() {
     socket.on("suspect-assignment", handleSuspectAssignment);
     socket.on("interrogation-state-restore", handleInterrogationRestore);
     socket.on("vote-status-updated", handleVoteStatusUpdated);
+    socket.on("game-results", handleGameResults);
     socket.on("room-closed", handleRoomClosed);
     socket.on("error", handleError);
     socket.on("connect", handleConnect);
@@ -143,6 +144,7 @@ export default function InvestigationRoom() {
       socket.off("suspect-assignment", handleSuspectAssignment);
       socket.off("interrogation-state-restore", handleInterrogationRestore);
       socket.off("vote-status-updated", handleVoteStatusUpdated);
+      socket.off("game-results", handleGameResults);
       socket.off("room-closed", handleRoomClosed);
       socket.off("error", handleError);
       socket.off("connect", handleConnect);
