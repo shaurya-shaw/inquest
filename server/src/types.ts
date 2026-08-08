@@ -39,6 +39,8 @@ export interface Room {
   suspectAssignments?: Record<string, string>;
   /** Full case file cached after first load — used by interrogation pipeline */
   caseFile?: CaseFile;
+  /** Map of playerId → suspectId votes (null if player didn't vote before timer expired) */
+  votes?: Map<string, string | null>;
 }
 
 
@@ -52,6 +54,8 @@ export interface PublicRoom {
   readyPlayers: string[];
   phaseStartedAt: number | null;
   phaseDuration: number | null;
+  /** Array of playerIds who have submitted votes */
+  votedPlayers?: string[];
 }
 
 // ── Case file schema (what lives in server/data/cases/*.json) ──────────────

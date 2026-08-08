@@ -30,6 +30,54 @@ const activeInterrogators = new Map<string, Set<string>>();
 const INTERROGATION_DURATION_SECONDS = 5 * 60; // 5 minutes
 
 /**
+ * Called by the main server to start the discussion timer after transition.
+ * Automatically transitions to RESULTS when timer expires.
+ */
+export function startDiscussionTimer(
+  io: Server,
+  roomId: string,
+  durationSeconds: number,
+): void {
+  const timer = setTimeout(() => {
+    const room = rooms.get(roomId);
+    if (!room || room.phase !== "DISCUSSION") return;
+
+    console.log(`[Discussion] Timer expired for room ${roomId} — transitioning to RESULTS`);
+    
+    // Record null votes for players who didn't vote
+    const connectedPlayers = room.players.filter((p) => p.connected);
+    connectedPlayers.forEach((player) => {
+      if (!room.votes?.has(player.playerId)) {
+        room.votes?.set(player.playerId, null);
+      }
+    });
+
+    room.phase = "RESULTS";
+    room.readyPlayers = [];
+    
+    io.to(roomId).emit("room-updated", {
+      roomId: room.roomId,
+      hostId: room.hostId,
+      players: room.players.map((p) => ({
+        playerId: p.playerId,
+        name: p.name,
+        isHost: p.isHost,
+        connected: p.connected,
+      })),
+      phase: room.phase,
+      caseId: room.caseId,
+      readyPlayers: room.readyPlayers,
+      phaseStartedAt: room.phaseStartedAt,
+      phaseDuration: room.phaseDuration,
+      votedPlayers: room.votes ? Array.from(room.votes.keys()) : undefined,
+    });
+  }, durationSeconds * 1000);
+
+  // Store timer with a special key for discussion phase
+  interrogationTimers.set(`discussion:${roomId}`, timer);
+}
+
+/**
  * Assigns suspects to players randomly and starts sessions.
  * Called when the room transitions to INTERROGATION phase.
  */
@@ -121,10 +169,18 @@ function checkAllDone(io: Server, roomId: string, finishedPlayerId: string): voi
 
     room.phase = "DISCUSSION";
     room.readyPlayers = [];
+    room.phaseStartedAt = Date.now();
+    room.phaseDuration = 180; // 3 minutes
+    room.votes = new Map();
+    
     activeInterrogators.delete(roomId);
     deleteRoomSessions(roomId);
 
     console.log(`[Interrogation] All players done in room ${roomId} — transitioning to DISCUSSION`);
+    
+    // Start the 3-minute discussion timer
+    startDiscussionTimer(io, roomId, 180);
+    
     io.to(roomId).emit("room-updated", {
       roomId: room.roomId,
       hostId: room.hostId,
@@ -139,6 +195,7 @@ function checkAllDone(io: Server, roomId: string, finishedPlayerId: string): voi
       readyPlayers: room.readyPlayers,
       phaseStartedAt: room.phaseStartedAt,
       phaseDuration: room.phaseDuration,
+      votedPlayers: [],
     });
   }
 }
@@ -314,6 +371,16 @@ export function registerInterrogationHandlers(
 /** Clears a player's interrogation timer (e.g. on disconnect) */
 export function clearPlayerTimer(roomId: string, playerId: string): void {
   const key = `${roomId}:${playerId}`;
+  const timer = interrogationTimers.get(key);
+  if (timer) {
+    clearTimeout(timer);
+    interrogationTimers.delete(key);
+  }
+}
+
+/** Clears the discussion timer for a room */
+export function clearDiscussionTimer(roomId: string): void {
+  const key = `discussion:${roomId}`;
   const timer = interrogationTimers.get(key);
   if (timer) {
     clearTimeout(timer);

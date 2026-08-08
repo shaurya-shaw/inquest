@@ -13,6 +13,8 @@ import { loadCaseFile, getPublicCaseData } from "./case-loader.js";
 import {
   registerInterrogationHandlers,
   startInterrogation,
+  startDiscussionTimer,
+  clearDiscussionTimer,
 } from "./interrogation/handler.js";
 
 config();
@@ -34,6 +36,8 @@ function getDisconnectKey(roomId: string, playerId: string) {
 }
 
 function serializeRoom(room: Room): PublicRoom {
+  const votedPlayers = room.votes ? Array.from(room.votes.keys()) : undefined;
+  
   return {
     roomId: room.roomId,
     hostId: room.hostId,
@@ -49,6 +53,7 @@ function serializeRoom(room: Room): PublicRoom {
     readyPlayers: room.readyPlayers,
     phaseStartedAt: room.phaseStartedAt,
     phaseDuration: room.phaseDuration,
+    votedPlayers,
   };
 }
 
@@ -196,6 +201,41 @@ const io = new Server(httpServer, {
 io.on("connection", (socket) => {
   console.log("A user connected:", socket.id);
 
+  socket.on("discussion-message", (payload) => {
+    const membership = socketMemberships.get(socket.id);
+    const roomId = membership?.roomId;
+    const playerId = membership?.playerId;
+
+    if (!roomId || !playerId) {
+      socket.emit("error", { message: "You are not in any room." });
+      return;
+    }
+
+    const room = rooms.get(roomId);
+
+    if (!room) {
+      socket.emit("error", { message: "Room not found." });
+      return;
+    }
+
+    const text =
+      typeof payload?.content === "string" ? payload.content.trim() : "";
+
+    if (!text) {
+      return;
+    }
+
+    const sender = room.players.find((entry) => entry.playerId === playerId);
+
+    io.to(roomId).emit("discussion-message", {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      playerId,
+      playerName: sender?.name ?? "Unknown Detective",
+      content: text,
+      timestamp: Date.now(),
+    });
+  });
+
   socket.on("create-room", ({ name, maxInvestigators, caseId, playerId }) => {
     const roomId = generateRoomCode();
 
@@ -312,6 +352,9 @@ io.on("connection", (socket) => {
 
     playerRoomMap.delete(socket.id);
 
+    // If the player had voted during discussion phase, preserve their vote
+    // (votes Map persists even when player is marked disconnected)
+    
     markPlayerDisconnected(roomId, playerId, socket.id);
 
     const updatedRoom = rooms.get(roomId);
@@ -549,6 +592,80 @@ io.on("connection", (socket) => {
 
     // Not everyone ready yet — broadcast updated ready list
     io.to(roomId).emit("room-updated", serializeRoom(room));
+  });
+
+  socket.on("submit-vote", ({ suspectId }) => {
+    const membership = socketMemberships.get(socket.id);
+    const roomId = membership?.roomId;
+    const playerId = membership?.playerId;
+
+    if (!roomId || !playerId) {
+      socket.emit("error", { message: "You are not in any room." });
+      return;
+    }
+
+    const room = rooms.get(roomId);
+
+    if (!room) {
+      socket.emit("error", { message: "Room not found." });
+      return;
+    }
+
+    if (room.phase !== "DISCUSSION") {
+      socket.emit("error", { message: "Voting is only available during discussion phase." });
+      return;
+    }
+
+    // Validate suspectId exists in the case file
+    if (!room.caseFile) {
+      socket.emit("error", { message: "Case data not available." });
+      return;
+    }
+
+    const suspectExists = room.caseFile.suspects.some((s) => s.id === suspectId);
+    if (!suspectExists) {
+      socket.emit("error", { message: "Invalid suspect ID." });
+      return;
+    }
+
+    // Check if player already voted
+    if (room.votes?.has(playerId)) {
+      socket.emit("error", { message: "You have already voted." });
+      return;
+    }
+
+    // Record the vote
+    if (!room.votes) {
+      room.votes = new Map();
+    }
+    room.votes.set(playerId, suspectId);
+
+    console.log(`[Discussion] Player ${playerId} voted for suspect ${suspectId} in room ${roomId}`);
+
+    // Emit vote-status-updated to all players in the room
+    const votedPlayers = Array.from(room.votes.keys());
+    io.to(roomId).emit("vote-status-updated", {
+      votedPlayers,
+      voteCount: votedPlayers.length,
+      totalPlayers: room.players.filter((p) => p.connected).length,
+    });
+
+    // Check if all connected players have voted
+    const connectedPlayers = room.players.filter((p) => p.connected);
+    const allVoted = connectedPlayers.every((p) => room.votes?.has(p.playerId));
+
+    if (allVoted && connectedPlayers.length > 0) {
+      console.log(`[Discussion] All players voted in room ${roomId} — transitioning to RESULTS early`);
+
+      // Clear the discussion timer
+      clearDiscussionTimer(roomId);
+
+      // Transition to RESULTS
+      room.phase = "RESULTS";
+      room.readyPlayers = [];
+
+      io.to(roomId).emit("room-updated", serializeRoom(room));
+    }
   });
 
   // ── Interrogation pipeline ────────────────────────────────────────────────
