@@ -23,9 +23,10 @@ export default function EvidenceBoard() {
 
   return (
     <div className="flex flex-col gap-2">
-      <h4 className="text-[9px] uppercase tracking-[0.25em] text-zinc-500">
-        Evidence Board
+      <h4 className="text-[12px] uppercase tracking-[0.25em] text-zinc-500">
+        Evidence Board 
       </h4>
+      <span className="text-zinc-300/20">(click to present evidence)</span>
 
       <div className="flex flex-col gap-1.5 overflow-y-auto max-h-[320px] pr-1 custom-scrollbar">
         <AnimatePresence>
