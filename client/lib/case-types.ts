@@ -62,3 +62,21 @@ export interface PublicCaseData {
   evidence: PublicEvidence[];
   timeline: CaseTimelineEvent[];
 }
+
+export interface PlayerVoteResult {
+  playerId: string;
+  playerName: string;
+  votedSuspectId: string | null;
+  votedSuspectName: string;
+}
+
+export interface GameResultsPayload {
+  murdererId: string;
+  murdererName: string;
+  murdererMotive?: string | undefined;
+  accusedSuspectId: string | null;
+  accusedSuspectName: string;
+  isCorrect: boolean;
+  consensusPercentage: number;
+  votes: PlayerVoteResult[];
+}

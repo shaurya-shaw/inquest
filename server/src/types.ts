@@ -244,3 +244,22 @@ export interface PublicCaseData {
   /** Only events with visibility: "public" */
   timeline: CaseTimelineEvent[];
 }
+
+export interface PlayerVoteResult {
+  playerId: string;
+  playerName: string;
+  votedSuspectId: string | null;
+  votedSuspectName: string;
+}
+
+/** Payload emitted via `game-results` event when RESULTS phase starts */
+export interface GameResultsPayload {
+  murdererId: string;
+  murdererName: string;
+  murdererMotive?: string | undefined;
+  accusedSuspectId: string | null;
+  accusedSuspectName: string;
+  isCorrect: boolean;
+  consensusPercentage: number;
+  votes: PlayerVoteResult[];
+}
