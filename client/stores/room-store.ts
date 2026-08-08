@@ -29,6 +29,10 @@ export interface RoomState {
   phaseStartedAt: number | null;
   /** Max investigation duration in seconds */
   phaseDuration: number | null;
+  /** Array of playerIds who have submitted votes during DISCUSSION phase */
+  votedPlayers?: string[];
+  /** Current player's vote (suspectId), null after voting */
+  playerVote?: string | null;
   updateRoom: (room: Partial<Omit<RoomState, "updateRoom" | "reset">>) => void;
   resetRoom: () => void;
 }
@@ -43,6 +47,8 @@ const initialState = {
   readyPlayers: [],
   phaseStartedAt: null,
   phaseDuration: null,
+  votedPlayers: undefined,
+  playerVote: undefined,
 } as const satisfies Omit<RoomState, "updateRoom" | "resetRoom">;
 
 export const useRoomStore = create<RoomState>((set) => ({
