@@ -10,6 +10,8 @@ import { toast } from "sonner";
 import { useParams, useRouter } from "next/navigation";
 import InvestigationPage from "@/components/investigation/InvestigationPage";
 import InterrogationPage from "@/components/interrogation/InterrogationPage";
+import DiscussionPage from "@/components/discussion/DiscussionPage";
+import ResultPage from "@/components/result/ResultPage";
 
 export default function InvestigationRoom() {
   const {
@@ -46,6 +48,17 @@ export default function InvestigationRoom() {
     const handleCaseData = (data: PublicCaseData) => {
       setCaseData(data);
       console.log("Case data received:", data.story.title);
+    };
+
+    const handleVoteStatusUpdated = ({
+      votedPlayers,
+    }: {
+      votedPlayers: string[];
+      voteCount: number;
+      totalPlayers: number;
+    }) => {
+      updateRoom({ votedPlayers });
+      console.log("Vote status updated:", votedPlayers);
     };
 
     const handleRoomClosed = ({ message }: { message: string }) => {
@@ -85,6 +98,7 @@ export default function InvestigationRoom() {
 
     socket.on("room-updated", handleRoomUpdated);
     socket.on("case-data", handleCaseData);
+    socket.on("vote-status-updated", handleVoteStatusUpdated);
     socket.on("room-closed", handleRoomClosed);
     socket.on("error", handleError);
     socket.on("connect", handleConnect);
@@ -94,6 +108,7 @@ export default function InvestigationRoom() {
     return () => {
       socket.off("room-updated", handleRoomUpdated);
       socket.off("case-data", handleCaseData);
+      socket.off("vote-status-updated", handleVoteStatusUpdated);
       socket.off("room-closed", handleRoomClosed);
       socket.off("error", handleError);
       socket.off("connect", handleConnect);
@@ -119,6 +134,8 @@ export default function InvestigationRoom() {
     );
   }
 
+  // return <DiscussionPage />       //for development mode only
+
   switch (phase) {
     case "LOBBY":
       return (
@@ -136,9 +153,10 @@ export default function InvestigationRoom() {
 
     case "INTERROGATION":
       return <InterrogationPage />;
-    // case "DISCUSSION":
-    // case "VOTING":
-    // case "RESULTS":
+    case "DISCUSSION":
+      return <DiscussionPage />;
+    case "RESULTS":
+      return <ResultPage />;
     default:
       return null;
   }
