@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface TypewriterProps {
   text: string;
@@ -47,16 +43,26 @@ export default function Typewriter({
     completedRef.current = false;
   }, [text, restartKey]);
 
-  // Drive character reveal via setInterval
+  // Drive character reveal via setTimeout with dynamic punctuation pauses
   useEffect(() => {
     if (isPaused) return;
     if (displayedCount >= text.length) return;
 
-    const id = setInterval(() => {
+    // Check the character that was just revealed to add a pause before the next character
+    let extraDelay = 0;
+    if (displayedCount > 0) {
+      const prevChar = text[displayedCount - 1];
+      if ([".", "!", "?"].includes(prevChar)) {
+        extraDelay = 400; // Sentence-ending pause (~350ms)
+      } else if ([",", ";", ":", "-", "—"].includes(prevChar)) {
+        extraDelay = 180; // Clause/comma pause (~180ms)
+      }
+    }
+
+    const timer = setTimeout(() => {
       setDisplayedCount((prev) => {
         const next = prev + 1;
         if (next >= text.length) {
-          clearInterval(id);
           if (!completedRef.current) {
             completedRef.current = true;
             // Defer callback to avoid state update during render
@@ -65,10 +71,10 @@ export default function Typewriter({
         }
         return next;
       });
-    }, speed);
+    }, speed + extraDelay);
 
-    return () => clearInterval(id);
-  }, [isPaused, displayedCount, text.length, speed]);
+    return () => clearTimeout(timer);
+  }, [isPaused, displayedCount, text, speed]);
 
   const displayedText = text.slice(0, displayedCount);
   const isDone = displayedCount >= text.length;

@@ -76,7 +76,7 @@ export default function StoryParagraph({
       {isActive ? (
         <Typewriter
           text={text}
-          speed={28}
+          speed={50}
           onComplete={onTypewriterComplete}
           isPaused={isPaused}
           restartKey={restartKey}
