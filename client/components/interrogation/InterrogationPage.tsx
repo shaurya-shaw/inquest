@@ -115,13 +115,13 @@ export default function InterrogationPage() {
         <ChatPanel />
       </div>
 
-      {/* ── CENTER-RIGHT: Suspect Info + Timer + Evidence Board (30%) ──── */}
+      {/* ── CENTER-RIGHT: Suspect Info + Evidence Board + Timer (30%) ──── */}
       <div className="hidden h-full md:flex md:w-[30%] md:flex-col md:gap-3 md:border-l md:border-zinc-800/30 md:p-3">
         <SuspectInfoBlock />
-        <InterrogationTimer />
         <div className="flex-1 overflow-hidden">
           <EvidenceBoard />
         </div>
+        <InterrogationTimer />
       </div>
 
       {/* ── FAR RIGHT: Detective Notes (25%) ──────────────────────────── */}

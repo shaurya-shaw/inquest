@@ -16,39 +16,46 @@ function formatTime(seconds: number): string {
 }
 
 /**
- * Floating Investigation HUD.
+ * Floating Investigation & Interrogation HUD.
  *
  * Anchored at the top-center of the viewport. Shows:
  * - Max-timer countdown
  * - Live ready count
- * - Ready button (visible only after min-time elapses)
+ * - Ready button (visible after 2 minutes elapse)
  *
- * Only renders when phase === "INVESTIGATION".
+ * Renders when phase === "INVESTIGATION" || phase === "INTERROGATION".
  */
 export default function InvestigationHUD() {
   const { phase, phaseStartedAt, phaseDuration, readyPlayers, players, roomId } =
     useRoomStore();
   const { playerId } = usePlayerStore();
 
-  // Seconds remaining on the max timer (derived client-side from server timestamps)
+  // Seconds remaining on the max timer
   const [timeRemaining, setTimeRemaining] = useState<number>(
     phaseDuration ?? 0
   );
   const [minTimeElapsed, setMinTimeElapsed] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Optimistic local ready state — updated by room-updated via store
+  // Optimistic local ready state
   const isReady = playerId ? readyPlayers.includes(playerId) : false;
 
-  // Recompute countdown every second from the server-provided start timestamp
   useEffect(() => {
-    if (phase !== "INVESTIGATION" || !phaseStartedAt || !phaseDuration) return;
+    if (
+      (phase !== "INVESTIGATION" && phase !== "INTERROGATION") ||
+      !phaseStartedAt ||
+      !phaseDuration
+    )
+      return;
+
+    const minTimeThreshold =
+      phase === "INVESTIGATION" ? MIN_INVESTIGATION_TIME : 120; // 2 minutes
 
     const tick = () => {
       const elapsedSeconds = (Date.now() - phaseStartedAt) / 1000;
       const remaining = phaseDuration - elapsedSeconds;
       setTimeRemaining(remaining);
-      setMinTimeElapsed(elapsedSeconds >= MIN_INVESTIGATION_TIME);
+      setMinTimeElapsed(elapsedSeconds >= minTimeThreshold);
     };
 
     tick(); // run immediately
@@ -68,6 +75,10 @@ export default function InvestigationHUD() {
 
   const connectedCount = players.filter((p) => p.connected).length;
   const readyCount = readyPlayers.length;
+  const readyButtonLabel =
+    phase === "INVESTIGATION"
+      ? "✓ Ready for Interrogation"
+      : "✓ Ready for Discussion";
 
   return (
     <motion.div
@@ -77,7 +88,7 @@ export default function InvestigationHUD() {
       transition={{ duration: 0.4, ease: "easeOut" }}
       className="fixed left-1/2 top-4 z-50 -translate-x-1/2"
       role="status"
-      aria-label="Investigation status"
+      aria-label="Phase status"
     >
       <div
         className="
@@ -121,7 +132,7 @@ export default function InvestigationHUD() {
           </span>
         </div>
 
-        {/* Ready button — only shown after min-time elapses */}
+        {/* Ready button — only shown after 2 minutes elapse */}
         <AnimatePresence>
           {minTimeElapsed && (
             <motion.div
@@ -148,7 +159,7 @@ export default function InvestigationHUD() {
               ) : (
                 /* Ready button */
                 <motion.button
-                  id="investigation-ready-btn"
+                  id="phase-ready-btn"
                   onClick={handleReady}
                   whileTap={{ scale: 0.96 }}
                   className="
@@ -158,9 +169,9 @@ export default function InvestigationHUD() {
                     hover:border-zinc-500 hover:bg-zinc-700/70 hover:text-white
                     active:scale-95
                   "
-                  aria-label="Mark yourself as ready for discussion"
+                  aria-label="Mark yourself as ready"
                 >
-                  ✓ Ready for Discussion
+                  {readyButtonLabel}
                 </motion.button>
               )}
             </motion.div>
