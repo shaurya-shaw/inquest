@@ -21,6 +21,7 @@ import {
   deleteRoomSessions,
 } from "./session-manager.js";
 import { rooms, playerRoomMap } from "../rooms.js";
+import { computeGameResults } from "../utils.js";
 
 // Per-player interrogation timers: "${roomId}:${playerId}" → NodeJS.Timeout
 const interrogationTimers = new Map<string, ReturnType<typeof setTimeout>>();
@@ -54,6 +55,11 @@ export function startDiscussionTimer(
 
     room.phase = "RESULTS";
     room.readyPlayers = [];
+
+    const resultsPayload = computeGameResults(room);
+    if (resultsPayload) {
+      io.to(roomId).emit("game-results", resultsPayload);
+    }
     
     io.to(roomId).emit("room-updated", {
       roomId: room.roomId,
@@ -169,6 +175,52 @@ function startPlayerTimer(
   interrogationTimers.set(key, timer);
 }
 
+export function transitionToDiscussion(io: Server, roomId: string): void {
+  const room = rooms.get(roomId);
+  if (!room || room.phase !== "INTERROGATION") return;
+
+  // Clear running per-player interrogation timers for this room
+  for (const [key, timer] of interrogationTimers.entries()) {
+    if (key.startsWith(`${roomId}:`)) {
+      clearTimeout(timer);
+      interrogationTimers.delete(key);
+    }
+  }
+
+  room.phase = "DISCUSSION";
+  room.readyPlayers = [];
+  room.phaseStartedAt = Date.now();
+  room.phaseDuration = 180; // 3 minutes
+  room.votes = new Map();
+
+  activeInterrogators.delete(roomId);
+  deleteRoomSessions(roomId);
+
+  console.log(
+    `[Interrogation] Transitioning room ${roomId} to DISCUSSION phase`,
+  );
+
+  // Start the 3-minute discussion timer
+  startDiscussionTimer(io, roomId, 180);
+
+  io.to(roomId).emit("room-updated", {
+    roomId: room.roomId,
+    hostId: room.hostId,
+    players: room.players.map((p) => ({
+      playerId: p.playerId,
+      name: p.name,
+      isHost: p.isHost,
+      connected: p.connected,
+    })),
+    phase: room.phase,
+    caseId: room.caseId,
+    readyPlayers: room.readyPlayers,
+    phaseStartedAt: room.phaseStartedAt,
+    phaseDuration: room.phaseDuration,
+    votedPlayers: [],
+  });
+}
+
 function checkAllDone(io: Server, roomId: string, finishedPlayerId: string): void {
   const active = activeInterrogators.get(roomId);
   if (!active) return;
@@ -176,40 +228,7 @@ function checkAllDone(io: Server, roomId: string, finishedPlayerId: string): voi
   active.delete(finishedPlayerId);
 
   if (active.size === 0) {
-    // All players done — transition to DISCUSSION
-    const room = rooms.get(roomId);
-    if (!room || room.phase !== "INTERROGATION") return;
-
-    room.phase = "DISCUSSION";
-    room.readyPlayers = [];
-    room.phaseStartedAt = Date.now();
-    room.phaseDuration = 180; // 3 minutes
-    room.votes = new Map();
-    
-    activeInterrogators.delete(roomId);
-    deleteRoomSessions(roomId);
-
-    console.log(`[Interrogation] All players done in room ${roomId} — transitioning to DISCUSSION`);
-    
-    // Start the 3-minute discussion timer
-    startDiscussionTimer(io, roomId, 180);
-    
-    io.to(roomId).emit("room-updated", {
-      roomId: room.roomId,
-      hostId: room.hostId,
-      players: room.players.map((p) => ({
-        playerId: p.playerId,
-        name: p.name,
-        isHost: p.isHost,
-        connected: p.connected,
-      })),
-      phase: room.phase,
-      caseId: room.caseId,
-      readyPlayers: room.readyPlayers,
-      phaseStartedAt: room.phaseStartedAt,
-      phaseDuration: room.phaseDuration,
-      votedPlayers: [],
-    });
+    transitionToDiscussion(io, roomId);
   }
 }
 

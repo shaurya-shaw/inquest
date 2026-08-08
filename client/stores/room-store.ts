@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import type { GameResultsPayload } from "@/lib/case-types";
 
 type RoomPhase =
   | "LOBBY"
@@ -33,7 +34,10 @@ export interface RoomState {
   votedPlayers?: string[];
   /** Current player's vote (suspectId), null after voting */
   playerVote?: string | null;
+  /** Final game results payload received from server */
+  resultsData?: GameResultsPayload | null;
   updateRoom: (room: Partial<Omit<RoomState, "updateRoom" | "reset">>) => void;
+  setResultsData: (results: GameResultsPayload) => void;
   resetRoom: () => void;
 }
 
@@ -49,10 +53,12 @@ const initialState = {
   phaseDuration: null,
   votedPlayers: undefined,
   playerVote: undefined,
-} as const satisfies Omit<RoomState, "updateRoom" | "resetRoom">;
+  resultsData: null,
+} as const satisfies Omit<RoomState, "updateRoom" | "setResultsData" | "resetRoom">;
 
 export const useRoomStore = create<RoomState>((set) => ({
   ...initialState,
   updateRoom: (room) => set((state) => ({ ...state, ...room })),
+  setResultsData: (resultsData) => set({ resultsData }),
   resetRoom: () => set(initialState),
 }));

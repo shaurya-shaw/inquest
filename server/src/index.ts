@@ -2,7 +2,7 @@ import express from "express";
 import { createServer } from "http";
 import { Server, type Socket } from "socket.io";
 import { config } from "dotenv";
-import { generateRoomCode } from "./utils.js";
+import { generateRoomCode, computeGameResults } from "./utils.js";
 import { rooms, playerRoomMap } from "./rooms.js";
 import type { PublicRoom, Room, DiscussionMessage } from "./types.js";
 import {
@@ -15,6 +15,7 @@ import {
   startInterrogation,
   startDiscussionTimer,
   clearDiscussionTimer,
+  transitionToDiscussion,
 } from "./interrogation/handler.js";
 import { getSession } from "./interrogation/session-manager.js";
 
@@ -397,6 +398,14 @@ io.on("connection", (socket) => {
           totalPlayers: room.players.filter((p) => p.connected).length,
         });
       }
+
+      // 4. Re-send game results if in RESULTS phase
+      if (room.phase === "RESULTS") {
+        const resultsPayload = computeGameResults(room);
+        if (resultsPayload) {
+          socket.emit("game-results", resultsPayload);
+        }
+      }
     }
   });
 
@@ -607,19 +616,20 @@ io.on("connection", (socket) => {
       return;
     }
 
-    if (room.phase !== "INVESTIGATION") {
-      socket.emit("error", { message: "Investigation is not active." });
+    if (room.phase !== "INVESTIGATION" && room.phase !== "INTERROGATION") {
+      socket.emit("error", { message: "Ready status is not active in this phase." });
       return;
     }
 
-    // Enforce minimum investigation time
+    // Enforce 2 minutes (120 seconds) minimum time
+    const MIN_TIME = 120;
     const elapsed = room.phaseStartedAt
       ? (Date.now() - room.phaseStartedAt) / 1000
       : 0;
 
-    if (elapsed < MIN_INVESTIGATION_TIME) {
+    if (elapsed < MIN_TIME) {
       socket.emit("error", {
-        message: `Investigation minimum time has not elapsed yet. Please wait ${Math.ceil(MIN_INVESTIGATION_TIME - elapsed)} more second(s).`,
+        message: `Minimum time has not elapsed yet. Please wait ${Math.ceil(MIN_TIME - elapsed)} more second(s).`,
       });
       return;
     }
@@ -628,7 +638,7 @@ io.on("connection", (socket) => {
     if (!room.readyPlayers.includes(playerId)) {
       room.readyPlayers.push(playerId);
       console.log(
-        `Room ${roomId}: player ${playerId} is ready (${room.readyPlayers.length}/${room.players.length})`,
+        `Room ${roomId} (${room.phase}): player ${playerId} is ready (${room.readyPlayers.length}/${room.players.length})`,
       );
     }
 
@@ -639,25 +649,30 @@ io.on("connection", (socket) => {
     );
 
     if (allReady && connectedPlayers.length > 0) {
-      console.log(
-        `Room ${roomId}: all detectives ready — transitioning to INTERROGATION`,
-      );
+      if (room.phase === "INVESTIGATION") {
+        console.log(
+          `Room ${roomId}: all detectives ready in INVESTIGATION — transitioning to INTERROGATION`,
+        );
 
-      // Clear the max-timer since we're transitioning early
-      const timer = investigationTimers.get(roomId);
-      if (timer) {
-        clearTimeout(timer);
-        investigationTimers.delete(roomId);
-      }
+        const timer = investigationTimers.get(roomId);
+        if (timer) {
+          clearTimeout(timer);
+          investigationTimers.delete(roomId);
+        }
 
-      room.phase = "INTERROGATION";
-      room.phaseStartedAt = Date.now();
-      room.phaseDuration = 5 * 60;
-      room.readyPlayers = [];
-      io.to(roomId).emit("room-updated", serializeRoom(room));
-      // Start interrogation — assign suspects and create sessions
-      if (room.caseFile) {
-        startInterrogation(io, roomId, room.caseFile);
+        room.phase = "INTERROGATION";
+        room.phaseStartedAt = Date.now();
+        room.phaseDuration = 5 * 60;
+        room.readyPlayers = [];
+        io.to(roomId).emit("room-updated", serializeRoom(room));
+        if (room.caseFile) {
+          startInterrogation(io, roomId, room.caseFile);
+        }
+      } else if (room.phase === "INTERROGATION") {
+        console.log(
+          `Room ${roomId}: all detectives ready in INTERROGATION — transitioning to DISCUSSION`,
+        );
+        transitionToDiscussion(io, roomId);
       }
       return;
     }
@@ -735,6 +750,11 @@ io.on("connection", (socket) => {
       // Transition to RESULTS
       room.phase = "RESULTS";
       room.readyPlayers = [];
+
+      const resultsPayload = computeGameResults(room);
+      if (resultsPayload) {
+        io.to(roomId).emit("game-results", resultsPayload);
+      }
 
       io.to(roomId).emit("room-updated", serializeRoom(room));
     }
