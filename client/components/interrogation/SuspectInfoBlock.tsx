@@ -28,6 +28,7 @@ const PRESSURE_COLORS: Record<string, string> = {
 
 export default function SuspectInfoBlock() {
   const suspectName = useInterrogationStore((s) => s.suspectName);
+  const avatarUrl = useInterrogationStore((s) => s.avatarUrl);
   const trust = useInterrogationStore((s) => s.trust);
   const pressure = useInterrogationStore((s) => s.pressure);
   const composure = useInterrogationStore((s) => s.composure);
@@ -43,9 +44,19 @@ export default function SuspectInfoBlock() {
       transition={{ duration: 0.4, ease: "easeOut" }}
       className="flex items-start gap-3 rounded-xl border border-zinc-800/60 bg-[#0d0d0d] p-3"
     >
-      {/* Portrait placeholder */}
-      <div className="flex h-[72px] w-[72px] flex-shrink-0 items-center justify-center rounded-lg border border-zinc-700/40 bg-zinc-900/80">
-        <span className="font-serif text-2xl text-zinc-600">?</span>
+      {/* Portrait / Avatar */}
+      <div className="flex h-[72px] w-[72px] flex-shrink-0 items-center justify-center overflow-hidden rounded-full border border-zinc-700/40 bg-zinc-900/80">
+        {avatarUrl ? (
+          <img
+            src={avatarUrl}
+            alt={suspectName ?? "Suspect"}
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <span className="font-serif text-2xl text-zinc-600">
+            {suspectName ? suspectName.charAt(0) : "?"}
+          </span>
+        )}
       </div>
 
       {/* Info + narrative labels */}

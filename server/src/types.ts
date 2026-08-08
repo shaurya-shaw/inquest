@@ -55,7 +55,7 @@ export interface PublicRoom {
   phaseStartedAt: number | null;
   phaseDuration: number | null;
   /** Array of playerIds who have submitted votes */
-  votedPlayers?: string[];
+  votedPlayers?: string[] | undefined;
 }
 
 // ── Case file schema (what lives in server/data/cases/*.json) ──────────────
@@ -126,6 +126,7 @@ export interface DeflectionTarget {
 export interface CaseSuspect {
   id: string;
   name: string;
+  avatarUrl?: string | undefined;
   age: number;
   occupation: string;
   relationshipToVictim: string;
@@ -203,6 +204,7 @@ export interface CaseFile {
 export interface PublicSuspect {
   id: string;
   name: string;
+  avatarUrl?: string | undefined;
   age: number;
   occupation: string;
   relationshipToVictim: string;

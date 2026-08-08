@@ -163,9 +163,9 @@ export default function VotingArea() {
                         : "border-zinc-800/70 bg-zinc-900/60 hover:border-zinc-700/80 hover:bg-zinc-900/80"
                 }`}
               >
-                {/* Profile Image Placeholder */}
+                {/* Profile Image / Avatar */}
                 <div
-                  className={`mx-auto mb-3 flex h-20 w-20 items-center justify-center rounded-full border-2 ${
+                  className={`mx-auto mb-3 flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border-2 ${
                     isLocked
                       ? "border-green-600/40 bg-green-950/20"
                       : isSelected
@@ -173,9 +173,17 @@ export default function VotingArea() {
                         : "border-zinc-700/50 bg-zinc-800/50"
                   }`}
                 >
-                  <span className="text-2xl font-bold tracking-wider text-zinc-500">
-                    {suspect.name.charAt(0)}
-                  </span>
+                  {suspect.avatarUrl ? (
+                    <img
+                      src={suspect.avatarUrl}
+                      alt={suspect.name}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-2xl font-bold tracking-wider text-zinc-500">
+                      {suspect.name.charAt(0)}
+                    </span>
+                  )}
                 </div>
 
                 {/* Suspect Name */}

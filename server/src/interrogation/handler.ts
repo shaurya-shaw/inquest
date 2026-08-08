@@ -123,6 +123,7 @@ export function startInterrogation(
     const payload: SuspectAssignmentPayload = {
       suspectId: suspect.id,
       suspectName: suspect.name,
+      avatarUrl: suspect.avatarUrl,
       evidence: caseFile.evidenceCatalog.map((e) => ({
         id: e.id,
         name: e.name,

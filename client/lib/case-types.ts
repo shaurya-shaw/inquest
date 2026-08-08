@@ -25,6 +25,7 @@ export interface CaseVictim {
 export interface PublicSuspect {
   id: string;
   name: string;
+  avatarUrl?: string | undefined;
   age: number;
   occupation: string;
   relationshipToVictim: string;

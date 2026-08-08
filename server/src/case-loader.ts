@@ -49,6 +49,7 @@ function toPublicSuspect(suspect: CaseSuspect): PublicSuspect {
   return {
     id: suspect.id,
     name: suspect.name,
+    avatarUrl: suspect.avatarUrl,
     age: suspect.age,
     occupation: suspect.occupation,
     relationshipToVictim: suspect.relationshipToVictim,

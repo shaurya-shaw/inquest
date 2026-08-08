@@ -36,6 +36,7 @@ interface InterrogationState {
   // Suspect assignment
   suspectId: string | null;
   suspectName: string | null;
+  avatarUrl: string | null;
   evidence: Array<{ id: string; name: string; description: string }>;
 
   // Chat
@@ -59,6 +60,7 @@ interface InterrogationState {
   setSuspectAssignment: (data: {
     suspectId: string;
     suspectName: string;
+    avatarUrl?: string;
     evidence: Array<{ id: string; name: string; description: string }>;
   }) => void;
   addPlayerMessage: (content: string, evidenceName?: string) => void;
@@ -77,6 +79,7 @@ let messageCounter = 0;
 export const useInterrogationStore = create<InterrogationState>((set) => ({
   suspectId: null,
   suspectName: null,
+  avatarUrl: null,
   evidence: [],
   messages: [],
   isWaitingForResponse: false,
@@ -92,6 +95,7 @@ export const useInterrogationStore = create<InterrogationState>((set) => ({
     set({
       suspectId: data.suspectId,
       suspectName: data.suspectName,
+      avatarUrl: data.avatarUrl ?? null,
       evidence: data.evidence,
     }),
 

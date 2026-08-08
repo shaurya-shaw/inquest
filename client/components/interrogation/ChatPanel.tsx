@@ -33,6 +33,7 @@ function useTypewriter(text: string, speed = 30) {
 /** A single suspect message with typewriter effect */
 function SuspectBubble({ content, isLatest }: { content: string; isLatest: boolean }) {
   const suspectName = useInterrogationStore((s) => s.suspectName);
+  const avatarUrl = useInterrogationStore((s) => s.avatarUrl);
   const { displayed, isTyping } = useTypewriter(
     content,
     isLatest ? 30 : 0, // only animate the latest message
@@ -43,18 +44,30 @@ function SuspectBubble({ content, isLatest }: { content: string; isLatest: boole
       initial={{ opacity: 0, x: -8 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.3 }}
-      className="flex flex-col gap-1 max-w-[85%] self-start"
+      className="flex items-start gap-2.5 max-w-[85%] self-start"
     >
-      <span className="text-[9px] uppercase tracking-[0.1em] text-zinc-600">
-        {suspectName ?? "Suspect"}
-      </span>
-      <div className="rounded-xl rounded-tl-sm border border-zinc-800/50 bg-zinc-900/60 px-3.5 py-2.5">
-        <p className="text-[13px] leading-relaxed text-zinc-300 whitespace-pre-wrap">
-          {isLatest ? displayed : content}
-          {isTyping && isLatest && (
-            <span className="inline-block w-0.5 h-3.5 bg-zinc-400 ml-0.5 animate-pulse" />
-          )}
-        </p>
+      <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center overflow-hidden rounded-full border border-zinc-700/50 bg-zinc-800/80 mt-1">
+        {avatarUrl ? (
+          <img src={avatarUrl} alt={suspectName ?? "Suspect"} className="h-full w-full object-cover" />
+        ) : (
+          <span className="text-[10px] font-bold text-zinc-400">
+            {suspectName ? suspectName.charAt(0) : "S"}
+          </span>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <span className="text-[9px] uppercase tracking-[0.1em] text-zinc-600">
+          {suspectName ?? "Suspect"}
+        </span>
+        <div className="rounded-xl rounded-tl-sm border border-zinc-800/50 bg-zinc-900/60 px-3.5 py-2.5">
+          <p className="text-[13px] leading-relaxed text-zinc-300 whitespace-pre-wrap">
+            {isLatest ? displayed : content}
+            {isTyping && isLatest && (
+              <span className="inline-block w-0.5 h-3.5 bg-zinc-400 ml-0.5 animate-pulse" />
+            )}
+          </p>
+        </div>
       </div>
     </motion.div>
   );

@@ -25,6 +25,7 @@
     {
       "id": "suspect-nadia-soren",
       "name": "Nadia Soren",
+      "avatarUrl": "/suspects/Nadia-soren.png",
       "age": 36,
       "occupation": "Structural Engineer",
       "relationshipToVictim": "Tenant in the same building. Nadia's firm occupies the third floor. She and Hollis had a professional but strained relationship — he had pressured her firm to falsify a load-bearing assessment for one of his warehouse renovations eighteen months ago. She refused. He threatened to have her lease terminated.",
@@ -97,6 +98,7 @@
     {
       "id": "suspect-joel-maret",
       "name": "Joel Maret",
+      "avatarUrl": "/suspects/Joel-maret.png",
       "age": 45,
       "occupation": "Fleet Coordinator (formerly independent shipping contractor)",
       "relationshipToVictim": "Professional rival turned dependent. Joel ran a small independent shipping operation for twelve years. When Hollis secured exclusive docking rights for the eastern pier, Joel lost his primary berth and his three largest contracts. His business collapsed within a week. Hollis then offered Joel a job as a fleet coordinator — working under the man who had destroyed him.",
@@ -191,17 +193,9 @@
   ],
   "evidenceCatalog": [
     {
-      "id": "evidence-boot-prints",
-      "name": "Wet Boot Prints",
-      "description": "A set of wet boot prints leading from the rooftop access door down to the third-floor corridor. It had not rained that night. The prints are consistent with women's work boots, size 8.",
-      "superficiallyImplicates": "suspect-nadia-soren",
-      "innocentExplanation": "I went to the rooftop to smoke. There is pooling water near the drainage grate from the tank overflow. I stepped through it. That is all.",
-      "trueSequenceOfEvents": "Nadia went to the rooftop terrace at approximately 11:50 PM to smoke. She stepped through standing water near the drainage grate. When she came back down, she tracked wet prints along the third-floor corridor and into the stairwell. These prints prove she was on the upper floors but have no connection to the murder on the second-floor landing."
-    },
-    {
       "id": "evidence-solvent-residue",
       "name": "Solvent Residue on Railing",
-      "description": "Residue consistent with industrial solvent was found on the stairwell railing near the second floor. The substance is used in both marine equipment maintenance and structural engineering work.",
+      "description": "Industrial solvent found on the stairwell railing, right where he fell.",
       "superficiallyImplicates": "suspect-nadia-soren",
       "innocentExplanation": "My firm uses that solvent for cleaning drafting equipment. But so does anyone who works with marine engines. Joel coordinates fleet maintenance — ask him what he had on his hands that night.",
       "trueSequenceOfEvents": "Joel Maret had been cleaning marine engine parts earlier that day. Residual solvent remained on his hands. When he grabbed the stairwell railing after shoving Hollis, he transferred the residue. The solvent implicates Nadia on the surface because her profession uses it, but it actually came from Joel."
@@ -209,23 +203,15 @@
     {
       "id": "evidence-thermos",
       "name": "Dented Steel Thermos",
-      "description": "A steel thermos belonging to Hollis was found on the stairwell landing where he fell. It was dented and empty. Hollis's fingerprints are on it. No other prints were recovered.",
+      "description": "Hollis's dented, empty thermos — found on the landing, his prints only.",
       "superficiallyImplicates": "suspect-joel-maret",
       "innocentExplanation": "The thermos was on his desk when we were talking. He was drinking from it. I never touched it. I do not know how it got to the stairwell.",
       "trueSequenceOfEvents": "Hollis carried the thermos with him when he followed Joel into the stairwell, still drinking from it while pressing the job offer. When Joel shoved him and he went over the railing, the thermos fell from his hand and landed on the same level. Its presence on the landing proves Hollis was in the stairwell voluntarily, not dragged there."
     },
     {
-      "id": "evidence-overturned-chair",
-      "name": "Overturned Office Chair",
-      "description": "Hollis's office chair was found knocked sideways on the second floor. The desk was undisturbed. There were no other signs of a struggle in the office itself.",
-      "superficiallyImplicates": "suspect-joel-maret",
-      "innocentExplanation": "The chair got knocked over during the conversation. I stood up too fast when he said something about my crew. I did not touch him. The desk is fine — look at it. If there had been a fight, more would be broken.",
-      "trueSequenceOfEvents": "During the meeting, Hollis made a dismissive remark about Joel's former crew. Joel stood up abruptly, knocking Hollis's chair backward. There was no physical contact at this point. The confrontation that led to the fall happened later, in the stairwell, not in the office."
-    },
-    {
       "id": "evidence-propped-door",
       "name": "Propped Stairwell Door",
-      "description": "The second-floor stairwell door was found propped open with a fire extinguisher. The door is equipped with an automatic closer and would normally shut on its own.",
+      "description": "The stairwell door was wedged open, against its own automatic closer.",
       "superficiallyImplicates": "suspect-joel-maret",
       "innocentExplanation": "I propped it open when I came in. The lock sticks. It is an old building. I have done that in every dockside building I have worked in. It is not evidence of anything.",
       "trueSequenceOfEvents": "Joel propped the door open on arrival as a practical habit. This detail is innocent in itself but creates opportunity — the open door is how Hollis followed Joel into the stairwell for the final confrontation. Without the propped door, Hollis might not have pursued Joel into the stairwell."
@@ -233,7 +219,7 @@
     {
       "id": "evidence-forearm-bruise",
       "name": "Forearm Bruise",
-      "description": "Hollis had a bruise on his right forearm that the medical examiner says is inconsistent with the fall itself. The bruise pattern suggests a grip or impact from a blunt surface, sustained shortly before death.",
+      "description": "A bruise on his forearm the medical examiner says the fall can't explain.",
       "superficiallyImplicates": "suspect-joel-maret",
       "innocentExplanation": "I did not grab him. I did not touch him. Maybe he hit the railing when he fell. Maybe he bumped into something earlier. I was not the only person in that building.",
       "trueSequenceOfEvents": "When Joel shoved Hollis on the stairwell landing, Hollis instinctively grabbed the railing with his right arm. The bruise was caused by the impact of his forearm against the metal railing as his grip failed and he went over. This is the most direct physical evidence of the shove, but Joel's explanation — that it could have come from the fall itself — is superficially plausible."

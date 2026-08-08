@@ -54,5 +54,6 @@ export interface SuspectStateUpdatePayload {
 export interface SuspectAssignmentPayload {
   suspectId: string;
   suspectName: string;
+  avatarUrl?: string | undefined;
   evidence: Array<{ id: string; name: string; description: string }>;
 }
