@@ -107,12 +107,19 @@ export default function InvestigationRoom() {
 
     const handleError = ({ message }: { message: string }) => {
       toast.error(message);
-      setIsRejoining(false);
-      clearGameSessionData();
+      const isFatal =
+        message?.toLowerCase().includes("not found") ||
+        message?.toLowerCase().includes("closed") ||
+        message?.toLowerCase().includes("not in any room");
 
-      setTimeout(() => {
-        router.push("/");
-      }, 1200);
+      if (isFatal) {
+        setIsRejoining(false);
+        clearGameSessionData();
+
+        setTimeout(() => {
+          router.push("/");
+        }, 1200);
+      }
     };
 
     const handleConnect = () => {

@@ -98,7 +98,13 @@ export function startInterrogation(
   if (!room.phaseStartedAt || room.phase !== "INTERROGATION") {
     room.phaseStartedAt = Date.now();
   }
-  room.phaseDuration = INTERROGATION_DURATION_SECONDS;
+
+  if (room.maxInvestigators === 1) {
+    room.demoSuspectIndex = 0;
+    room.phaseDuration = 3 * 60; // 3 minutes for Suspect 1 in Demo Mode
+  } else {
+    room.phaseDuration = INTERROGATION_DURATION_SECONDS;
+  }
 
   const connectedPlayers = room.players.filter((p) => p.connected);
   const suspects = caseFile.suspects;
@@ -144,9 +150,59 @@ export function startInterrogation(
 
     io.to(player.socketId).emit("suspect-assignment", payload);
 
-    // Start 5-minute timer for this player
+    // Start interrogation timer for this player
     startPlayerTimer(io, roomId, playerId);
   }
+}
+
+export function advanceDemoSuspect(
+  io: Server,
+  roomId: string,
+  caseFile: CaseFile,
+): void {
+  const room = rooms.get(roomId);
+  if (!room || room.maxInvestigators !== 1) return;
+
+  const suspects = caseFile.suspects;
+  if (suspects.length < 2) {
+    transitionToDiscussion(io, roomId);
+    return;
+  }
+
+  // Clear existing timers for this room
+  for (const [key, timer] of interrogationTimers.entries()) {
+    if (key.startsWith(`${roomId}:`)) {
+      clearTimeout(timer);
+      interrogationTimers.delete(key);
+    }
+  }
+
+  room.demoSuspectIndex = 1;
+  room.phaseStartedAt = Date.now();
+  room.phaseDuration = 3 * 60; // 3 minutes for Suspect 2
+  room.readyPlayers = [];
+
+  const soloPlayer = room.players.find((p) => p.connected);
+  if (!soloPlayer) return;
+
+  const suspect = suspects[1]!;
+  room.suspectAssignments = { [soloPlayer.playerId]: suspect.id };
+
+  createSession(roomId, soloPlayer.playerId, suspect.id);
+
+  const payload: SuspectAssignmentPayload = {
+    suspectId: suspect.id,
+    suspectName: suspect.name,
+    avatarUrl: suspect.avatarUrl,
+    evidence: caseFile.evidenceCatalog.map((e) => ({
+      id: e.id,
+      name: e.name,
+      description: e.description,
+    })),
+  };
+
+  io.to(soloPlayer.socketId).emit("suspect-assignment", payload);
+  startPlayerTimer(io, roomId, soloPlayer.playerId);
 }
 
 function startPlayerTimer(
@@ -157,7 +213,8 @@ function startPlayerTimer(
   const key = `${roomId}:${playerId}`;
   const room = rooms.get(roomId);
   const elapsedMs = room?.phaseStartedAt ? Date.now() - room.phaseStartedAt : 0;
-  const remainingMs = Math.max(0, INTERROGATION_DURATION_SECONDS * 1000 - elapsedMs);
+  const durationSec = room?.phaseDuration || INTERROGATION_DURATION_SECONDS;
+  const remainingMs = Math.max(0, durationSec * 1000 - elapsedMs);
 
   const timer = setTimeout(() => {
     interrogationTimers.delete(key);

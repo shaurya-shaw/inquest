@@ -13,6 +13,7 @@ import { loadCaseFile, getPublicCaseData } from "./case-loader.js";
 import {
   registerInterrogationHandlers,
   startInterrogation,
+  advanceDemoSuspect,
   startDiscussionTimer,
   clearDiscussionTimer,
   transitionToDiscussion,
@@ -52,6 +53,7 @@ function serializeRoom(room: Room): PublicRoom {
     phase: room.phase,
     caseId: room.caseId,
     maxInvestigators: room.maxInvestigators,
+    demoSuspectIndex: room.demoSuspectIndex,
     readyPlayers: room.readyPlayers,
     phaseStartedAt: room.phaseStartedAt,
     phaseDuration: room.phaseDuration,
@@ -621,8 +623,10 @@ io.on("connection", (socket) => {
       return;
     }
 
-    // Enforce 2 minutes (120 seconds) minimum time
-    const MIN_TIME = 120;
+    // Enforce minimum time (60s for Demo Mode interrogation, 120s otherwise)
+    const isDemoInterrogation =
+      room.maxInvestigators === 1 && room.phase === "INTERROGATION";
+    const MIN_TIME = isDemoInterrogation ? 60 : 120;
     const elapsed = room.phaseStartedAt
       ? (Date.now() - room.phaseStartedAt) / 1000
       : 0;
@@ -662,17 +666,25 @@ io.on("connection", (socket) => {
 
         room.phase = "INTERROGATION";
         room.phaseStartedAt = Date.now();
-        room.phaseDuration = 5 * 60;
+        room.phaseDuration = room.maxInvestigators === 1 ? 3 * 60 : 5 * 60;
         room.readyPlayers = [];
         io.to(roomId).emit("room-updated", serializeRoom(room));
         if (room.caseFile) {
           startInterrogation(io, roomId, room.caseFile);
         }
       } else if (room.phase === "INTERROGATION") {
-        console.log(
-          `Room ${roomId}: all detectives ready in INTERROGATION — transitioning to DISCUSSION`,
-        );
-        transitionToDiscussion(io, roomId);
+        if (room.maxInvestigators === 1 && (room.demoSuspectIndex ?? 0) === 0 && room.caseFile) {
+          console.log(
+            `Room ${roomId}: Demo Mode advancing from Suspect 1 to Suspect 2`,
+          );
+          advanceDemoSuspect(io, roomId, room.caseFile);
+          io.to(roomId).emit("room-updated", serializeRoom(room));
+        } else {
+          console.log(
+            `Room ${roomId}: all detectives ready in INTERROGATION — transitioning to DISCUSSION`,
+          );
+          transitionToDiscussion(io, roomId);
+        }
       }
       return;
     }

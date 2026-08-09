@@ -49,8 +49,10 @@ export default function InvestigationLobby({
   maxPlayers = 4,
   isHost = true,
 }: LobbyProps) {
-  const emptySlots = maxPlayers - players.length;
-  const canStart = isHost && players.length >= 2;
+  const isDemo = maxPlayers === 1;
+  const minRequired = isDemo ? 1 : 2;
+  const emptySlots = Math.max(0, maxPlayers - players.length);
+  const canStart = isHost && players.length >= minRequired;
 
   const [copied, setCopied] = useState(false);
 
@@ -90,6 +92,11 @@ export default function InvestigationLobby({
           <motion.div variants={lineVariants}>
             [ OK ] DECRYPTING CASE FILES...
           </motion.div>
+          {isDemo && (
+            <motion.div variants={lineVariants} className="text-amber-500 font-bold">
+              [ OK ] DEMO MODE INITIALIZED — 1 DETECTIVE MATRIX
+            </motion.div>
+          )}
           <motion.div variants={lineVariants}>
             [ OK ] TERMINAL READY.
           </motion.div>
@@ -227,7 +234,7 @@ export default function InvestigationLobby({
               <div className="w-full md:w-auto inline-flex items-center border border-neutral-900 p-4 text-neutral-600 cursor-not-allowed">
                 <span className="mr-4 font-bold">{">"}</span>
                 <span className="uppercase tracking-[0.2em]">
-                  ERR: AWAITING_PERSONNEL (MIN 2)
+                  ERR: AWAITING_PERSONNEL (MIN {minRequired})
                 </span>
                 <span className="ml-4 w-3 h-5 bg-neutral-800 block animate-pulse" />
               </div>

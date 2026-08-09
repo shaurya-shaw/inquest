@@ -11,7 +11,7 @@ import { useNotebookStore } from "@/stores/notebook-store";
 import { toast } from "sonner";
 
 export default function CreateCaseDossier() {
-  const [investigators, setInvestigators] = useState(2);
+  const [investigators, setInvestigators] = useState<number | null>(null);
   const [isClassified, setIsClassified] = useState(false);
   const [isChapterOpen, setIsChapterOpen] = useState(false);
   const [selectedCase, setSelectedCase] = useState<{
@@ -80,6 +80,10 @@ export default function CreateCaseDossier() {
   const handleCreateCase = () => {
     if (!detectiveName.trim()) {
       toast.error("Please enter your Detective Name.");
+      return;
+    }
+    if (!investigators) {
+      toast.error("Please select Maximum Investigators.");
       return;
     }
     setIsClassified(true);
@@ -209,8 +213,8 @@ export default function CreateCaseDossier() {
               Maximum Investigators
             </label>
             <div className="flex flex-wrap items-center gap-6 sm:gap-8">
-              {[2, 3, 4].map((num) => {
-                const isAvailable = num === 2;
+              {[1, 2, 3, 4].map((num) => {
+                const isAvailable = num === 1 || num === 2;
                 return (
                   <button
                     key={num}
@@ -235,7 +239,12 @@ export default function CreateCaseDossier() {
                       )}
                     </span>
                     <span>{num}</span>
-                    {!isAvailable && (
+                    {num === 1 && (
+                      <span className="font-mono text-[9px] font-bold uppercase tracking-wider text-amber-900 border border-amber-800/40 bg-amber-950/10 px-1.5 py-0.5 rounded">
+                        DEMO ONLY
+                      </span>
+                    )}
+                    {num > 2 && (
                       <span className="font-mono text-[9px] font-bold uppercase tracking-wider text-zinc-600 border border-zinc-600/30 px-1.5 py-0.5 rounded">
                         V1: 2 Max
                       </span>

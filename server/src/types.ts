@@ -38,6 +38,7 @@ export interface Room {
   phase: RoomPhase;
   caseId: string | null;
   maxInvestigators?: number;
+  demoSuspectIndex?: number;
   /** playerIds who have clicked "Ready for Discussion" */
   readyPlayers: string[];
   /** Unix timestamp (ms) when the INVESTIGATION phase started */
@@ -62,6 +63,7 @@ export interface PublicRoom {
   phase: RoomPhase;
   caseId: string | null;
   maxInvestigators?: number | undefined;
+  demoSuspectIndex?: number | undefined;
   readyPlayers: string[];
   phaseStartedAt: number | null;
   phaseDuration: number | null;

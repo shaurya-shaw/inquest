@@ -34,6 +34,7 @@ export default function InterrogationPage() {
       avatarUrl?: string;
       evidence: Array<{ id: string; name: string; description: string }>;
     }) => {
+      resetInterrogation();
       setSuspectAssignment(data);
       startTimer();
     };

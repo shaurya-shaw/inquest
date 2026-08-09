@@ -24,6 +24,7 @@ export interface RoomState {
   phase: RoomPhase;
   caseId: string | null;
   maxInvestigators?: number;
+  demoSuspectIndex?: number;
   /** playerIds who clicked "Ready for Discussion" */
   readyPlayers: string[];
   /** Unix timestamp (ms) when the INVESTIGATION phase started */
