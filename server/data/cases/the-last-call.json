@@ -13,7 +13,7 @@
       "Your task is to determine which one."
     ]
   },
-  "caseBrief": "A man who made his fortune stealing other people's livelihoods was found at the bottom of a stairwell with a broken neck. Two people were in the building that night. Both had keys. Both had grudges. The fall was two stories — just enough to kill, just enough to be an accident. Someone knows which it was.",
+  "caseBrief": "After Joel left Hollis's office at approximately 1:00 AM, he went down the stairwell. Hollis followed him to the second-floor landing, still talking, still pressing the job offer. Joel turned around and shoved Hollis backward. Hollis stumbled, hit the railing, and went over. Joel heard the impact. He stood on the landing for approximately thirty seconds, then walked down and left the building. He did not check on Hollis. He did not call anyone.",
   "victim": {
     "id": "victim-ray-hollis",
     "name": "Ray Hollis",
@@ -106,7 +106,7 @@
       "speakingStyle": "Short, blunt sentences. Uses concrete language — names, times, specific objects. Occasionally trails off mid-sentence when a topic touches something painful. Will answer direct questions directly but becomes evasive when asked about his feelings.",
       "currentEmotionalState": "A grinding mix of resentment, shame, and suppressed grief. He is angry at Hollis, angry at himself for showing up that night, and deeply aware that his presence in the building makes him look guilty. He is not performing innocence — he is enduring suspicion.",
       "publicAlibi": "He says Hollis contacted him that afternoon and asked him to come to the office at 11 PM to discuss a fleet coordinator position. He arrived at 11:15 PM, went to Hollis's second-floor office, and they talked for about an hour. He says the conversation was tense but professional. He left at 1:10 AM. He says Hollis was alive and sitting at his desk when he walked out.",
-      "possibleMotive": "Hollis destroyed Joel's independent business by taking the pier contract. Joel lost twelve years of work in a week. The job offer could be seen as humiliation — working for the man who ruined you. Joel had both financial motive and personal rage.",
+      "possibleMotive": "He destroyed Joel's business",
       "knownFacts": [
         "He was in the building between 11:15 PM and 1:10 AM.",
         "He used a guest pass issued by Hollis to enter.",
