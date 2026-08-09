@@ -39,6 +39,9 @@ export const metadata: Metadata = {
   },
 };
 
+import IntroOverlay from "@/components/intro/IntroOverlay";
+import MobileBlockerOverlay from "@/components/device/MobileBlockerOverlay";
+
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
 const inter = Inter({
@@ -75,6 +78,8 @@ export default function RootLayout({
       )}
     >
       <body className="min-h-screen overflow-hidden flex flex-col bg-[#050505] text-white font-sans">
+        <MobileBlockerOverlay />
+        <IntroOverlay />
         {children}
         <Toaster richColors position="top-right" />
       </body>
