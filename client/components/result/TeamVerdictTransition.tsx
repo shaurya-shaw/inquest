@@ -109,16 +109,16 @@ export default function TeamVerdictTransition({
           </p>
         </div>
 
-        {/* ── ACCUSED MURDERER SECTION ─────────────────────────────────── */}
+        {/* ── ACCUSED MURDERER / TIE SECTION ─────────────────────────────── */}
         <div className="relative mb-8 rounded border-2 border-zinc-800/40 bg-zinc-900/5 p-5 text-center font-mono">
           <span className="block text-[10px] font-bold uppercase tracking-[0.25em] text-zinc-600">
-            Primary Suspect Accused By Team
+            {resultsData?.isTie ? "Investigation Outcome" : "Primary Suspect Accused By Team"}
           </span>
           <span className="mt-1 block font-serif text-2xl font-black uppercase tracking-wider text-zinc-900 sm:text-3xl">
-            {accusedName}
+            {resultsData?.isTie ? "⚖ VOTE TIED — INCONCLUSIVE ⚖" : accusedName}
           </span>
 
-          {/* Animated Rubber Stamp: VERDICT FILED */}
+          {/* Animated Rubber Stamp */}
           <motion.div
             initial={{ scale: 3, opacity: 0, rotate: -25 }}
             animate={{ scale: 1, opacity: 0.9, rotate: -8 }}
@@ -130,7 +130,7 @@ export default function TeamVerdictTransition({
             }}
             className="pointer-events-none absolute right-4 top-2 rounded border-4 border-red-800 px-3 py-1 font-serif text-xl font-black uppercase tracking-widest text-red-800 opacity-90 mix-blend-multiply sm:right-6 sm:text-2xl"
           >
-            VERDICT FILED
+            {resultsData?.isTie ? "VOTE TIED" : "VERDICT FILED"}
           </motion.div>
         </div>
 

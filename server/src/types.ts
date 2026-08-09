@@ -252,6 +252,12 @@ export interface PlayerVoteResult {
   votedSuspectName: string;
 }
 
+export interface TiedSuspectResult {
+  suspectId: string;
+  suspectName: string;
+  voteCount: number;
+}
+
 /** Payload emitted via `game-results` event when RESULTS phase starts */
 export interface GameResultsPayload {
   murdererId: string;
@@ -260,6 +266,8 @@ export interface GameResultsPayload {
   accusedSuspectId: string | null;
   accusedSuspectName: string;
   isCorrect: boolean;
+  isTie?: boolean | undefined;
+  tiedSuspects?: TiedSuspectResult[] | undefined;
   consensusPercentage: number;
   votes: PlayerVoteResult[];
 }

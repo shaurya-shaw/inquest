@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Paperclip, ScanBarcode, Check, RotateCcw } from "lucide-react";
+import { Paperclip, ScanBarcode, Check, RotateCcw, Scale } from "lucide-react";
 import { useRoomStore } from "@/stores/room-store";
 import { useCaseStore } from "@/stores/case-store";
 import { useRouter } from "next/navigation";
@@ -26,6 +26,7 @@ export default function ResultPage() {
     );
   }
 
+  const isTie = resultsData?.isTie ?? false;
   const isCorrect = resultsData?.isCorrect ?? false;
   const murdererName = resultsData?.murdererName || "Unknown Suspect";
   const accusedName = resultsData?.accusedSuspectName || "No Consensus Reached";
@@ -37,6 +38,8 @@ export default function ResultPage() {
     resultsData?.murdererMotive ||
     murdererSuspect?.possibleMotive ||
     "Motivated by conflict & opportunity";
+
+  const tiedSuspects = resultsData?.tiedSuspects ?? [];
 
   return (
     <div
@@ -73,12 +76,13 @@ export default function ResultPage() {
             <span className="border-2 border-zinc-800/40 px-2 py-0.5 uppercase">
               Dept. of Justice
             </span>
-            <span>FORM 404-CLOSED</span>
+            <span>FORM 404-{isTie ? "INCONCLUSIVE" : "CLOSED"}</span>
           </div>
           <div className="flex flex-col items-end space-y-1">
             <ScanBarcode className="h-8 w-24 opacity-60" />
             <span>
-              ID: {story?.caseId || caseId || roomId || "CASE-0042"} — CLOSED
+              ID: {story?.caseId || caseId || roomId || "CASE-0042"} —{" "}
+              {isTie ? "INCONCLUSIVE" : "CLOSED"}
             </span>
           </div>
         </div>
@@ -92,11 +96,12 @@ export default function ResultPage() {
             {story?.title || "Case Resolution File"}
           </h1>
           <p className="mt-2 font-mono text-xs tracking-wider text-zinc-700">
-            CASE FILE — {story?.caseId || caseId || "CASE-0042"} — CLOSED
+            CASE FILE — {story?.caseId || caseId || "CASE-0042"} —{" "}
+            {isTie ? "INCONCLUSIVE" : "CLOSED"}
           </p>
         </div>
 
-        {/* ── SLAPPED RUBBER STAMP: CASE SOLVED vs CASE FAILED ──────────── */}
+        {/* ── SLAPPED RUBBER STAMP: CASE SOLVED / CASE FAILED / CASE INCONCLUSIVE ──────────── */}
         <div className="relative mb-10 flex flex-col items-center justify-center rounded border-2 border-dashed border-zinc-800/30 p-8 bg-zinc-900/5">
           {/* Animated Stamp Slapped onto Dossier */}
           <motion.div
@@ -109,121 +114,235 @@ export default function ResultPage() {
               damping: 15,
             }}
             className={[
-              "pointer-events-none absolute z-20 rounded border-4 px-6 py-2 font-serif text-3xl font-black uppercase tracking-widest mix-blend-multiply sm:text-5xl shadow-lg",
-              isCorrect
-                ? "border-emerald-700/70 text-emerald-800/60 bg-emerald-950/10"
-                : "border-red-800/70 text-red-900/60 bg-red-950/10",
+              "pointer-events-none absolute z-20 rounded border-4 px-6 py-2 font-serif text-3xl font-black uppercase tracking-widest mix-blend-multiply sm:text-5xl shadow-lg text-center",
+              isTie
+                ? "border-amber-800/70 text-amber-950/60 bg-amber-950/10"
+                : isCorrect
+                  ? "border-emerald-700/70 text-emerald-800/60 bg-emerald-950/10"
+                  : "border-red-800/70 text-red-900/60 bg-red-950/10",
             ].join(" ")}
           >
-            {isCorrect ? "STATUS: CASE SOLVED" : "STATUS: CASE FAILED"}
+            {isTie
+              ? "STATUS: CASE INCONCLUSIVE"
+              : isCorrect
+                ? "STATUS: CASE SOLVED"
+                : "STATUS: CASE FAILED"}
           </motion.div>
 
           <span className="font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-500 mb-1">
-            Target Identified By Medical Examiner & Forensics
+            {isTie
+              ? "Majority Suspect Vote Failed"
+              : "Target Identified By Medical Examiner & Forensics"}
           </span>
-          <h2 className="font-serif text-2xl font-black uppercase tracking-wider text-zinc-900 sm:text-3xl">
-            Murderer: {murdererName}
-          </h2>
+          <p className="font-serif text-center text-sm sm:text-base leading-relaxed italic text-black max-w-lg">
+            {isTie
+              ? "The investigation failed to establish a majority suspect beyond reasonable doubt."
+              : `Murderer: ${murdererName}`}
+          </p>
         </div>
 
-        {/* ── FINAL RECONSTRUCTION ──────────────────────────────────────── */}
-        <div className="mb-10 font-serif">
-          <div className="mb-3 flex items-center gap-2 border-b border-zinc-800/30 pb-2">
-            <span className="font-mono text-xs font-bold uppercase tracking-widest text-zinc-800">
-              Final Reconstruction
-            </span>
-          </div>
-          <div className="rounded border border-zinc-800/20 bg-zinc-900/5 p-5">
-            <p className="text-sm sm:text-base leading-relaxed italic text-zinc-800">
-              &quot;
-              {caseBrief ||
-                story?.paragraphs?.[0] ||
-                "Investigation completed."}
-              &quot;
-            </p>
-          </div>
-        </div>
+        {/* ── IF TIE: RENDER FINAL VOTE & TIED SUSPECT COMPARISON BARS ── */}
+        {isTie ? (
+          <div className="mb-10 font-mono">
+            <div className="mb-4 border-b border-zinc-800/30 pb-2 text-center">
+              <span className="text-xs font-bold uppercase tracking-[0.25em] text-zinc-800">
+                FINAL VOTE — INVESTIGATORS&apos; VERDICT
+              </span>
+            </div>
 
-        {/* ── EVIDENCE CHECKLIST ────────────────────────────────────────── */}
-        <div className="mb-10 font-mono">
-          <div className="mb-3 border-b border-zinc-800/30 pb-2">
-            <span className="text-xs font-bold uppercase tracking-widest text-zinc-800">
-              Recovered Evidence Catalog
-            </span>
+            {/* Tied Suspect Comparison Grid */}
+            <div className="grid gap-4 sm:grid-cols-2">
+              {tiedSuspects.length > 0
+                ? tiedSuspects.map((ts) => (
+                    <div
+                      key={ts.suspectId}
+                      className="flex flex-col items-center justify-between rounded border-2 border-zinc-800/30 bg-zinc-900/5 p-5 text-center"
+                    >
+                      <span className="font-serif text-lg font-black uppercase text-zinc-900">
+                        {ts.suspectName}
+                      </span>
+                      <div className="my-3 font-mono text-lg font-bold text-zinc-800 tracking-widest">
+                        ████████
+                      </div>
+                      <div className="flex flex-col items-center">
+                        <span className="text-2xl font-black text-zinc-900">
+                          {ts.voteCount}
+                        </span>
+                        <span className="text-[10px] font-bold tracking-widest text-zinc-600 uppercase">
+                          VOTES
+                        </span>
+                      </div>
+                    </div>
+                  ))
+                : /* Fallback if tiedSuspects empty */
+                  resultsData?.votes && resultsData.votes.length > 0
+                  ? Array.from(
+                      new Set(resultsData.votes.map((v) => v.votedSuspectName)),
+                    ).map((sName) => {
+                      const count = resultsData.votes.filter(
+                        (v) => v.votedSuspectName === sName,
+                      ).length;
+                      return (
+                        <div
+                          key={sName}
+                          className="flex flex-col items-center justify-between rounded border-2 border-zinc-800/30 bg-zinc-900/5 p-5 text-center"
+                        >
+                          <span className="font-serif text-lg font-black uppercase text-zinc-900">
+                            {sName}
+                          </span>
+                          <div className="my-3 font-mono text-lg font-bold text-zinc-800 tracking-widest">
+                            ████████
+                          </div>
+                          <div className="flex flex-col items-center">
+                            <span className="text-2xl font-black text-zinc-900">
+                              {count}
+                            </span>
+                            <span className="text-[10px] font-bold tracking-widest text-zinc-600 uppercase">
+                              VOTES
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })
+                  : null}
+            </div>
+
+            {/* Centered Tied Badge */}
+            <div className="mt-6 flex flex-col items-center justify-center rounded border border-amber-900/30 bg-amber-950/10 p-4 text-center">
+              <div className="flex items-center gap-2 text-amber-900 font-bold text-sm tracking-widest uppercase">
+                <Scale className="h-4 w-4" /> ⚖ VOTE TIED ⚖{" "}
+                <Scale className="h-4 w-4" />
+              </div>
+              <span className="mt-1 text-xs text-zinc-700">
+                No suspect reached a majority.
+              </span>
+            </div>
+
+            {/* Actual Truth Reveal Section */}
+            <div className="mt-8 border-t-2 border-zinc-800/30 pt-6 font-serif">
+              <div className="mb-2 text-center font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-red-900/80">
+                ACTUAL TRUTH
+              </div>
+              <div className="text-center">
+                <p className="font-mono text-xs text-zinc-600 uppercase tracking-widest">
+                  MURDERER
+                </p>
+                <h3 className="text-2xl font-black text-zinc-900 uppercase">
+                  {murdererName}
+                </h3>
+                <p className="mt-2 text-xs italic text-zinc-700">
+                  The case remains unresolved by the investigation team.
+                </p>
+              </div>
+            </div>
           </div>
-          <div className="grid gap-2 sm:grid-cols-2">
-            {evidence && evidence.length > 0 ? (
-              evidence.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex items-center gap-2.5 rounded bg-zinc-900/5 px-3.5 py-2 text-xs border border-zinc-800/20"
-                >
-                  <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded border border-emerald-800 bg-emerald-800/20 text-emerald-900 font-bold">
-                    <Check className="h-3 w-3 stroke-[3]" />
-                  </span>
-                  <span className="font-bold text-zinc-900">{item.name}</span>
-                </div>
-              ))
-            ) : (
-              <>
-                <div className="flex items-center gap-2.5 rounded bg-zinc-900/5 px-3.5 py-2 text-xs border border-zinc-800/20">
-                  <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded border border-emerald-800 bg-emerald-800/20 text-emerald-900 font-bold">
-                    <Check className="h-3 w-3 stroke-[3]" />
+        ) : (
+          /* ── NORMAL VERDICT SECTIONS ───────────────────────────────── */
+          <>
+            {/* FINAL RECONSTRUCTION */}
+            <div className="mb-10 font-serif">
+              <div className="mb-3 flex items-center gap-2 border-b border-zinc-800/30 pb-2">
+                <span className="font-mono text-xs font-bold uppercase tracking-widest text-zinc-800">
+                  Final Reconstruction
+                </span>
+              </div>
+              <div className="rounded border border-zinc-800/20 bg-zinc-900/5 p-5">
+                <p className="text-sm sm:text-base leading-relaxed italic text-zinc-800">
+                  &quot;
+                  {caseBrief ||
+                    story?.paragraphs?.[0] ||
+                    "Investigation completed."}
+                  &quot;
+                </p>
+              </div>
+            </div>
+
+            {/* EVIDENCE CHECKLIST */}
+            <div className="mb-10 font-mono">
+              <div className="mb-3 border-b border-zinc-800/30 pb-2">
+                <span className="text-xs font-bold uppercase tracking-widest text-zinc-800">
+                  Recovered Evidence Catalog
+                </span>
+              </div>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {evidence && evidence.length > 0 ? (
+                  evidence.map((item) => (
+                    <div
+                      key={item.id}
+                      className="flex items-center gap-2.5 rounded bg-zinc-900/5 px-3.5 py-2 text-xs border border-zinc-800/20"
+                    >
+                      <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded border border-emerald-800 bg-emerald-800/20 text-emerald-900 font-bold">
+                        <Check className="h-3 w-3 stroke-[3]" />
+                      </span>
+                      <span className="font-bold text-zinc-900">
+                        {item.name}
+                      </span>
+                    </div>
+                  ))
+                ) : (
+                  <>
+                    <div className="flex items-center gap-2.5 rounded bg-zinc-900/5 px-3.5 py-2 text-xs border border-zinc-800/20">
+                      <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded border border-emerald-800 bg-emerald-800/20 text-emerald-900 font-bold">
+                        <Check className="h-3 w-3 stroke-[3]" />
+                      </span>
+                      <span className="font-bold text-zinc-900">
+                        Forensic Physical Evidence
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2.5 rounded bg-zinc-900/5 px-3.5 py-2 text-xs border border-zinc-800/20">
+                      <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded border border-emerald-800 bg-emerald-800/20 text-emerald-900 font-bold">
+                        <Check className="h-3 w-3 stroke-[3]" />
+                      </span>
+                      <span className="font-bold text-zinc-900">
+                        Security Access Logs
+                      </span>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* INVESTIGATORS' VERDICT SUMMARY */}
+            <div className="mb-10 font-mono">
+              <div className="mb-3 border-b border-zinc-800/30 pb-2">
+                <span className="text-xs font-bold uppercase tracking-widest text-zinc-800">
+                  Investigators&apos; Verdict Summary
+                </span>
+              </div>
+
+              <div className="space-y-2 rounded border border-zinc-800/30 bg-zinc-900/5 p-4 text-xs">
+                <div className="flex items-center justify-between">
+                  <span className="text-zinc-600 font-bold">
+                    Murderer ....................
                   </span>
                   <span className="font-bold text-zinc-900">
-                    Forensic Physical Evidence
+                    {murdererName}
                   </span>
                 </div>
-                <div className="flex items-center gap-2.5 rounded bg-zinc-900/5 px-3.5 py-2 text-xs border border-zinc-800/20">
-                  <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded border border-emerald-800 bg-emerald-800/20 text-emerald-900 font-bold">
-                    <Check className="h-3 w-3 stroke-[3]" />
+                <div className="flex items-center justify-between">
+                  <span className="text-zinc-600 font-bold">
+                    Accused ....................
                   </span>
-                  <span className="font-bold text-zinc-900">
-                    Security Access Logs
+                  <span className="font-bold text-zinc-900">{accusedName}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-zinc-600 font-bold">
+                    Motive ....................
+                  </span>
+                  <span className="font-bold text-zinc-900 truncate max-w-[280px]">
+                    {motiveText}
                   </span>
                 </div>
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* ── INVESTIGATORS' VERDICT (Dot-Leader Monospace Table) ───────── */}
-        <div className="mb-10 font-mono">
-          <div className="mb-3 border-b border-zinc-800/30 pb-2">
-            <span className="text-xs font-bold uppercase tracking-widest text-zinc-800">
-              Investigators&apos; Verdict Summary
-            </span>
-          </div>
-
-          <div className="space-y-2 rounded border border-zinc-800/30 bg-zinc-900/5 p-4 text-xs">
-            <div className="flex items-center justify-between">
-              <span className="text-zinc-600 font-bold">
-                Murderer ....................
-              </span>
-              <span className="font-bold text-zinc-900">{murdererName}</span>
+                <div className="flex items-center justify-between">
+                  <span className="text-zinc-600 font-bold">
+                    Team Consensus ..............
+                  </span>
+                  <span className="font-bold text-zinc-900">{consensus}%</span>
+                </div>
+              </div>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-zinc-600 font-bold">
-                Accused ....................
-              </span>
-              <span className="font-bold text-zinc-900">{accusedName}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-zinc-600 font-bold">
-                Motive ....................
-              </span>
-              <span className="font-bold text-zinc-900 truncate max-w-[280px]">
-                {motiveText}
-              </span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-zinc-600 font-bold">
-                Team Consensus ..............
-              </span>
-              <span className="font-bold text-zinc-900">{consensus}%</span>
-            </div>
-          </div>
-        </div>
+          </>
+        )}
 
         <div className="my-8 h-px w-full bg-zinc-800/30" />
 
@@ -232,7 +351,7 @@ export default function ResultPage() {
           {/* Stamped Case Closed Mark */}
           <div className="relative flex items-center justify-center border-2 border-dashed border-zinc-800/40 px-6 py-3 rounded">
             <span className="font-serif text-lg font-black uppercase tracking-[0.25em] text-zinc-800/70">
-              CASE CLOSED
+              {isTie ? "CASE INCONCLUSIVE" : "CASE CLOSED"}
             </span>
           </div>
 

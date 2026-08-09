@@ -1,4 +1,9 @@
-import type { Room, GameResultsPayload, PlayerVoteResult } from "./types.js";
+import type {
+  Room,
+  GameResultsPayload,
+  PlayerVoteResult,
+  TiedSuspectResult,
+} from "./types.js";
 
 const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
@@ -45,14 +50,32 @@ export function computeGameResults(room: Room): GameResultsPayload | null {
     });
   });
 
-  let topSuspectId: string | null = null;
   let maxVotes = 0;
+  const topSuspectIds: string[] = [];
+
   voteCounts.forEach((count, sId) => {
     if (count > maxVotes) {
       maxVotes = count;
-      topSuspectId = sId;
+      topSuspectIds.length = 0;
+      topSuspectIds.push(sId);
+    } else if (count === maxVotes && maxVotes > 0) {
+      topSuspectIds.push(sId);
     }
   });
+
+  const isTie = topSuspectIds.length > 1;
+  const topSuspectId = isTie ? null : (topSuspectIds[0] ?? null);
+
+  const tiedSuspects: TiedSuspectResult[] = isTie
+    ? topSuspectIds.map((sId) => {
+        const s = suspects.find((sp) => sp.id === sId);
+        return {
+          suspectId: sId,
+          suspectName: s ? s.name : "Unknown Suspect",
+          voteCount: maxVotes,
+        };
+      })
+    : [];
 
   const totalVotesCast = Array.from(voteCounts.values()).reduce((a, b) => a + b, 0);
   const consensusPercentage =
@@ -61,11 +84,13 @@ export function computeGameResults(room: Room): GameResultsPayload | null {
   const accusedSuspect = topSuspectId
     ? suspects.find((s) => s.id === topSuspectId)
     : null;
-  const accusedSuspectName = accusedSuspect
+  const accusedSuspectName = isTie
+    ? "Vote Tied — Case Inconclusive"
+    : accusedSuspect
     ? accusedSuspect.name
     : "No Consensus Reached";
 
-  const isCorrect = topSuspectId === room.caseFile.murdererId;
+  const isCorrect = !isTie && topSuspectId === room.caseFile.murdererId;
 
   return {
     murdererId: room.caseFile.murdererId,
@@ -74,6 +99,8 @@ export function computeGameResults(room: Room): GameResultsPayload | null {
     accusedSuspectId: topSuspectId,
     accusedSuspectName,
     isCorrect,
+    isTie,
+    tiedSuspects,
     consensusPercentage,
     votes: playerVoteResults,
   };
