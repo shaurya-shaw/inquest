@@ -2,6 +2,10 @@
 
 Inquest is a AI powered multiplayer murder mystery game where each player privately interrogates an AI-controlled suspect, then the group reconvenes to compare findings and vote on the murderer. Every suspect is a stateful conversational agent — not a static chatbot — governed by an interrogation engine that tracks psychological state, gates what information can be accessed, and reassembles the suspect's behavior turn by turn based on what the player has actually earned.
 
+## Interrogation Pipeline
+
+![Interrogation Pipeline](./client/public/new-architecture.png)
+
 ## How the Interrogation Engine Works
 
 Every suspect reply is generated through a six-stage pipeline that runs per turn, per player:
@@ -35,6 +39,7 @@ Every suspect reply is generated through a six-stage pipeline that runs per turn
 ### Session Scoping
 
 State is stored per suspect per room, not per player. If multiple detectives interrogate the same suspect, they share:
+
 - Evidence unlocks (unknownFacts already triggered)
 - Emotional metrics (trust, pressure, composure)
 - Psychology gate states (rationalization, deflection, crack)
@@ -59,6 +64,7 @@ A suspect's psychological state evolves across all interrogators. The guard does
 ### Running Locally
 
 **Server:**
+
 ```bash
 cd server
 npm install
@@ -67,6 +73,7 @@ npm run dev  # Runs on :5000
 ```
 
 **Client:**
+
 ```bash
 cd client
 npm install
@@ -74,6 +81,7 @@ npm run dev  # Runs on :3000
 ```
 
 **Case Structure**: See `server/data/cases/the-last-call.json` for the schema. Each case includes:
+
 - Story paragraphs (revealed during investigation phase)
 - Victim profile
 - Suspect array with public data, unknownFacts, secrets, memories, interrogationConstraints, emotionalVulnerability, moralJustification (murderer only), deflectionTarget (innocents only)
@@ -87,4 +95,4 @@ npm run dev  # Runs on :3000
 2. **Investigation** (5 min): Players read the case story and review evidence
 3. **Interrogation** (5 min per player): Each player is assigned one suspect for private interrogation
 4. **Discussion** (3 min): Players compare findings in group chat, review their notes and Players vote who they think the murderer is.
-6. **Results**: Votes are revealed, correct murderer is shown, win/loss determined
+5. **Results**: Votes are revealed, correct murderer is shown, win/loss determined
