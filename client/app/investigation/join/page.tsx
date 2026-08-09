@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { RoomState, useRoomStore } from "@/stores/room-store";
 import { usePlayerStore } from "@/stores/player-store";
 import { useNotebookStore } from "@/stores/notebook-store";
+import { toast } from "sonner";
 
 export default function AccessCaseDossier() {
   const [isGranted, setIsGranted] = useState(false);
@@ -23,7 +24,7 @@ export default function AccessCaseDossier() {
       clearNotes();
       updatePlayer({
         roomId: room.roomId,
-        detectiveName,
+        detectiveName: detectiveName.trim(),
         playerId,
         isHost: false,
       });
@@ -35,25 +36,39 @@ export default function AccessCaseDossier() {
       }, 600);
     };
 
-    socket.on("room-updated", handlePlayerJoined);
-
-    socket.on("error", ({ message }) => {
+    const handleError = ({ message }: { message: string }) => {
       console.error("Error joining room:", message);
-      // Handle error (e.g., show a notification to the user)
-    });
+      toast.error(message || "Invalid Room Code or unable to join case.");
+      setIsGranted(false);
+    };
+
+    socket.on("room-updated", handlePlayerJoined);
+    socket.on("error", handleError);
 
     return () => {
-      socket.off("room-updated");
-      socket.off("error");
+      socket.off("room-updated", handlePlayerJoined);
+      socket.off("error", handleError);
     };
-  }, [router, detectiveName, playerId, updatePlayer, updateRoom]);
+  }, [router, detectiveName, playerId, updatePlayer, updateRoom, clearNotes]);
 
   const handleAccessCase = () => {
+    const trimmedName = detectiveName.trim();
+    const trimmedCode = accessCode.trim().toUpperCase();
+
+    if (!trimmedName) {
+      toast.error("Please enter your Detective Name.");
+      return;
+    }
+
+    if (!trimmedCode) {
+      toast.error("Please enter a valid Room Code.");
+      return;
+    }
+
     setIsGranted(true);
-    // Add logic here to validate the code and navigate to the lobby
     socket.emit("join-room", {
-      roomId: accessCode,
-      name: detectiveName,
+      roomId: trimmedCode,
+      name: trimmedName,
       playerId,
     });
   };

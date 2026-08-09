@@ -8,11 +8,16 @@ import { usePlayerStore } from "@/stores/player-store";
 import { RoomState, useRoomStore } from "@/stores/room-store";
 import { useNotebookStore } from "@/stores/notebook-store";
 
+import { toast } from "sonner";
+
 export default function CreateCaseDossier() {
-  const [investigators, setInvestigators] = useState(4);
+  const [investigators, setInvestigators] = useState(2);
   const [isClassified, setIsClassified] = useState(false);
   const [isChapterOpen, setIsChapterOpen] = useState(false);
-  const [selectedCase, setSelectedCase] = useState<{ label: string; id: string }>({
+  const [selectedCase, setSelectedCase] = useState<{
+    label: string;
+    id: string;
+  }>({
     label: "The Last Call",
     id: "the-last-call",
   });
@@ -46,7 +51,7 @@ export default function CreateCaseDossier() {
       clearNotes();
       updatePlayer({
         roomId: room.roomId,
-        detectiveName,
+        detectiveName: detectiveName.trim(),
         playerId,
         isHost: true,
       });
@@ -58,19 +63,28 @@ export default function CreateCaseDossier() {
       }, 600);
     };
 
+    const handleError = ({ message }: { message: string }) => {
+      toast.error(message);
+      setIsClassified(false);
+    };
+
     socket.on("room-created", handleRoomCreated);
+    socket.on("error", handleError);
 
     return () => {
       socket.off("room-created", handleRoomCreated);
+      socket.off("error", handleError);
     };
-  }, [router, detectiveName, playerId, updatePlayer, updateRoom]);
+  }, [router, detectiveName, playerId, updatePlayer, updateRoom, clearNotes]);
 
   const handleCreateCase = () => {
+    if (!detectiveName.trim()) {
+      toast.error("Please enter your Detective Name.");
+      return;
+    }
     setIsClassified(true);
-    console.log("clicked");
-    // Add logic here to submit the form/navigate after the stamp animation
     socket.emit("create-room", {
-      name: detectiveName,
+      name: detectiveName.trim(),
       maxInvestigators: investigators,
       caseId: selectedCase.id,
       playerId,
@@ -167,9 +181,12 @@ export default function CreateCaseDossier() {
 
             {isChapterOpen && (
               <div className="absolute left-0 right-0 top-full z-30 mt-2 overflow-hidden rounded-sm border border-zinc-800/30 bg-[#e1d5c0] shadow-[0_12px_30px_rgba(0,0,0,0.18)]">
-                {([
-                  { label: "The Last Call", id: "the-last-call" },
-                ] as { label: string; id: string }[]).map((c) => (
+                {(
+                  [{ label: "The Last Call", id: "the-last-call" }] as {
+                    label: string;
+                    id: string;
+                  }[]
+                ).map((c) => (
                   <button
                     key={c.id}
                     type="button"
@@ -191,27 +208,41 @@ export default function CreateCaseDossier() {
             <label className="mb-4 block text-xs font-bold uppercase tracking-widest text-zinc-600">
               Maximum Investigators
             </label>
-            <div className="flex gap-8">
-              {[2, 3, 4].map((num) => (
-                <button
-                  key={num}
-                  onClick={() => setInvestigators(num)}
-                  className="flex items-center gap-3 text-lg text-zinc-800"
-                >
-                  <span
-                    className={`flex h-6 w-6 items-center justify-center rounded-full border-2 transition-all ${
-                      investigators === num
-                        ? "border-zinc-900 bg-zinc-900"
-                        : "border-zinc-400 bg-transparent"
+            <div className="flex flex-wrap items-center gap-6 sm:gap-8">
+              {[2, 3, 4].map((num) => {
+                const isAvailable = num === 2;
+                return (
+                  <button
+                    key={num}
+                    type="button"
+                    disabled={!isAvailable}
+                    onClick={() => isAvailable && setInvestigators(num)}
+                    className={`flex items-center gap-2.5 text-lg transition-opacity ${
+                      isAvailable
+                        ? "text-zinc-800 cursor-pointer"
+                        : "text-zinc-500 opacity-40 cursor-not-allowed"
                     }`}
                   >
-                    {investigators === num && (
-                      <span className="h-2 w-2 rounded-full bg-[#e1d5c0]" />
+                    <span
+                      className={`flex h-6 w-6 items-center justify-center rounded-full border-2 transition-all ${
+                        investigators === num
+                          ? "border-zinc-900 bg-zinc-900"
+                          : "border-zinc-400 bg-transparent"
+                      }`}
+                    >
+                      {investigators === num && (
+                        <span className="h-2 w-2 rounded-full bg-[#e1d5c0]" />
+                      )}
+                    </span>
+                    <span>{num}</span>
+                    {!isAvailable && (
+                      <span className="font-mono text-[9px] font-bold uppercase tracking-wider text-zinc-600 border border-zinc-600/30 px-1.5 py-0.5 rounded">
+                        V1: 2 Max
+                      </span>
                     )}
-                  </span>
-                  {num}
-                </button>
-              ))}
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>
