@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import {
   Inter,
   Playfair_Display,
@@ -7,6 +8,36 @@ import {
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Toaster } from "sonner";
+
+export const metadata: Metadata = {
+  metadataBase: new URL("https://inquest-game.com"),
+  title: "INQUEST — AI-Powered Multiplayer Detective & Interrogation Game",
+  description:
+    "An immersive multiplayer AI detective experience. Interrogate suspects, analyze forensic evidence, discuss theories with your team, and uncover the truth.",
+  openGraph: {
+    type: "website",
+    title: "INQUEST — AI-Powered Multiplayer Detective & Interrogation Game",
+    description:
+      "An immersive multiplayer AI detective experience. Interrogate suspects, analyze forensic evidence, discuss theories with your team, and uncover the truth.",
+    url: "https://inquest-game.com",
+    siteName: "INQUEST",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1536,
+        height: 1024,
+        alt: "INQUEST - AI-Powered Multiplayer Detective Experience",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "INQUEST — AI-Powered Multiplayer Detective & Interrogation Game",
+    description:
+      "An immersive multiplayer AI detective experience. Interrogate suspects, analyze forensic evidence, discuss theories with your team, and uncover the truth.",
+    images: ["/og-image.png"],
+  },
+};
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
