@@ -199,7 +199,7 @@ export default function InvestigationLobby({
               className="flex justify-between border-b border-neutral-900 pb-2"
             >
               <span className="text-neutral-500">EST_DURATION</span>
-              <span className="text-white">~15 MIN</span>
+              <span className="text-white">~10 MIN</span>
             </motion.div>
             <motion.div
               variants={lineVariants}
