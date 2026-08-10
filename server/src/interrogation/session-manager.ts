@@ -1,7 +1,7 @@
 import { getAI } from "./ai-client.js";
 import type { SuspectSessionState } from "./types.js";
 
-const COMPRESSION_MODEL = "gemini-3.5-flash-lite";
+const COMPRESSION_MODEL = "gemini-3.1-flash-lite";
 
 // In-memory session store: "${roomId}:${playerId}" → SuspectSessionState
 const sessions = new Map<string, SuspectSessionState>();
