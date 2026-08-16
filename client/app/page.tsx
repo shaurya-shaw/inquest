@@ -50,9 +50,9 @@ export default function Home() {
       </div>
 
       {/* ================= RESPONSIVE CONTENT LAYER ================= */}
-      <div className="relative z-20 flex-1 flex flex-col justify-between items-center w-full max-w-7xl mx-auto px-6 py-12 md:py-16 text-center lg:text-left">
+      <div className="relative z-20 flex-1 flex flex-col justify-between items-center w-full max-w-7xl mx-auto px-6 pt-8 sm:pt-10 md:pt-12 lg:pt-14 pb-8 sm:pb-12 md:pb-16 text-center lg:text-left">
         {/* Top Header Section */}
-        <header className="w-full flex flex-col items-center lg:items-start gap-6">
+        <header className="w-full flex flex-col items-center lg:items-start gap-4 sm:gap-5 lg:gap-6">
           {/* AI Feature Tag */}
           <button
             disabled
@@ -62,12 +62,12 @@ export default function Home() {
           </button>
 
           {/* Main Title Group */}
-          <div className="space-y-4 mt-4">
-            <h1 className="font-cinzel font-black text-6xl sm:text-7xl md:text-8xl lg:text-9xl tracking-wider text-transparent bg-clip-text bg-linear-to-b from-gray-50 via-gray-200 to-gray-500 drop-shadow-[0_10px_15px_rgba(0,0,0,0.9)]">
+          <div className="space-y-3 sm:space-y-4 mt-2 sm:mt-3">
+            <h1 className="font-cinzel font-black text-6xl sm:text-7xl md:text-8xl lg:text-8xl xl:text-9xl leading-none tracking-wider text-transparent bg-clip-text bg-linear-to-b from-gray-50 via-gray-200 to-gray-500 drop-shadow-[0_10px_15px_rgba(0,0,0,0.9)]">
               INQUEST
             </h1>
 
-            <p className="font-cinzel font-medium text-sm sm:text-base md:text-xl tracking-[0.3em] text-gray-300 uppercase max-w-xl mx-auto lg:mx-0 balance">
+            <p className="font-cinzel font-medium text-sm sm:text-base md:text-lg lg:text-xl tracking-[0.3em] text-gray-300 uppercase max-w-xl mx-auto lg:mx-0 balance">
               Every case has a different truth.
             </p>
           </div>
