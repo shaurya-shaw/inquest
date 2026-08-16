@@ -26,7 +26,7 @@ export default function InterrogationTimer() {
   const ended = useInterrogationStore((s) => s.interrogationEnded);
 
   const isDemo = maxInvestigators === 1;
-  const minTimeThreshold = isDemo ? 60 : 120; // 1 min threshold in Demo Mode, 2 min in normal
+  const minTimeThreshold = isDemo ? 10 : 120; // 10s threshold in Demo Mode, 2 min in normal
 
   const [remaining, setRemaining] = useState(INTERROGATION_DURATION);
   const [minTimeElapsed, setMinTimeElapsed] = useState(false);

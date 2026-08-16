@@ -623,15 +623,13 @@ io.on("connection", (socket) => {
       return;
     }
 
-    // Enforce minimum time (MIN_INVESTIGATION_TIME for investigation, 60s for Demo Mode interrogation, 120s otherwise)
-    const isDemoInterrogation =
-      room.maxInvestigators === 1 && room.phase === "INTERROGATION";
-    const MIN_TIME =
-      room.phase === "INVESTIGATION"
+    // Enforce minimum time (10s in Demo Mode for both phases; otherwise MIN_INVESTIGATION_TIME for investigation, 120s for interrogation)
+    const isDemo = room.maxInvestigators === 1;
+    const MIN_TIME = isDemo
+      ? 10
+      : room.phase === "INVESTIGATION"
         ? MIN_INVESTIGATION_TIME
-        : isDemoInterrogation
-          ? 60
-          : 120;
+        : 120;
     const elapsed = room.phaseStartedAt
       ? (Date.now() - room.phaseStartedAt) / 1000
       : 0;

@@ -26,7 +26,7 @@ function formatTime(seconds: number): string {
  * Renders when phase === "INVESTIGATION" || phase === "INTERROGATION".
  */
 export default function InvestigationHUD() {
-  const { phase, phaseStartedAt, phaseDuration, readyPlayers, players, roomId } =
+  const { phase, phaseStartedAt, phaseDuration, readyPlayers, players, roomId, maxInvestigators } =
     useRoomStore();
   const { playerId } = usePlayerStore();
 
@@ -48,8 +48,12 @@ export default function InvestigationHUD() {
     )
       return;
 
-    const minTimeThreshold =
-      phase === "INVESTIGATION" ? MIN_INVESTIGATION_TIME : 120; // 2 minutes
+    const isDemo = maxInvestigators === 1;
+    const minTimeThreshold = isDemo
+      ? 10
+      : phase === "INVESTIGATION"
+        ? MIN_INVESTIGATION_TIME
+        : 120;
 
     const tick = () => {
       const elapsedSeconds = (Date.now() - phaseStartedAt) / 1000;
