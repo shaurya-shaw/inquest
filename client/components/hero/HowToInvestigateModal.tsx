@@ -24,14 +24,14 @@ export default function HowToInvestigateModal({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
         {/* Dark Blurred Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="absolute inset-0 bg-black/80 backdrop-blur-md cursor-pointer"
+          className="fixed inset-0 bg-black/80 backdrop-blur-md cursor-pointer"
         />
 
         {/* Modal Container */}
@@ -40,7 +40,7 @@ export default function HowToInvestigateModal({
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.92, y: 15 }}
           transition={{ type: "spring", stiffness: 320, damping: 25 }}
-          className="relative z-10 w-full max-w-lg overflow-hidden rounded-xl border border-red-900/50 bg-[#0d0d11] p-6 text-zinc-100 shadow-[0_25px_70px_rgba(0,0,0,0.95)] sm:p-8 font-serif"
+          className="relative z-10 w-full max-w-lg max-h-[90vh] overflow-y-auto custom-scrollbar rounded-xl border border-red-900/50 bg-[#0d0d11] p-6 text-zinc-100 shadow-[0_25px_70px_rgba(0,0,0,0.95)] sm:p-8 font-serif"
         >
           {/* Top Crimson Bevel Line */}
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-950 via-red-600 to-red-950" />

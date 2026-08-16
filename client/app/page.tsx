@@ -87,7 +87,7 @@ export default function Home() {
       </div>
 
       {/* Embedded Dynamic Hero Module */}
-      <footer className="relative z-30 w-full mt-auto">
+      <footer className="relative z-10 w-full mt-auto pointer-events-none">
         <BloodPool />
       </footer>
     </main>
