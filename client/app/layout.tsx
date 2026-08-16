@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://inquest-game.com"),
+  metadataBase: new URL("https://inquest-lemon.vercel.app"),
   title: "INQUEST — AI-Powered Multiplayer Detective & Interrogation Game",
   description:
     "An immersive multiplayer AI detective experience. Interrogate suspects, analyze forensic evidence, discuss theories with your team, and uncover the truth.",
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     title: "INQUEST — AI-Powered Multiplayer Detective & Interrogation Game",
     description:
       "An immersive multiplayer AI detective experience. Interrogate suspects, analyze forensic evidence, discuss theories with your team, and uncover the truth.",
-    url: "https://inquest-game.com",
+    url: "https://inquest-lemon.vercel.app",
     siteName: "INQUEST",
     images: [
       {
