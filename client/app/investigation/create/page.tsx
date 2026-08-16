@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { usePlayerStore } from "@/stores/player-store";
 import { RoomState, useRoomStore } from "@/stores/room-store";
 import { useNotebookStore } from "@/stores/notebook-store";
+import ColdStartOverlay from "@/components/cold-start/ColdStartOverlay";
 
 import { toast } from "sonner";
 
@@ -14,6 +15,11 @@ export default function CreateCaseDossier() {
   const [investigators, setInvestigators] = useState<number | null>(null);
   const [isClassified, setIsClassified] = useState(false);
   const [isChapterOpen, setIsChapterOpen] = useState(false);
+  const [showColdStart, setShowColdStart] = useState(false);
+  const [roomReady, setRoomReady] = useState(false);
+  // If room-created hasn't fired within this threshold, show the cold-start overlay
+  const coldStartTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const COLD_START_THRESHOLD_MS = 1000;
   const [selectedCase, setSelectedCase] = useState<{
     label: string;
     id: string;
@@ -58,14 +64,35 @@ export default function CreateCaseDossier() {
 
       updateRoom(room);
 
-      setTimeout(() => {
+      // Cancel the cold-start threshold timer if it hasn't fired yet
+      if (coldStartTimerRef.current) {
+        clearTimeout(coldStartTimerRef.current);
+        coldStartTimerRef.current = null;
+      }
+
+      if (showColdStart) {
+        // Overlay is visible — signal completion, then navigate
+        setRoomReady(true);
+        setTimeout(() => {
+          setShowColdStart(false);
+          setRoomReady(false);
+          router.push(`/investigation/${room.roomId}`);
+        }, 800);
+      } else {
+        // Server was warm — navigate directly
         router.push(`/investigation/${room.roomId}`);
-      }, 600);
+      }
     };
 
     const handleError = ({ message }: { message: string }) => {
       toast.error(message);
       setIsClassified(false);
+      setShowColdStart(false);
+      setRoomReady(false);
+      if (coldStartTimerRef.current) {
+        clearTimeout(coldStartTimerRef.current);
+        coldStartTimerRef.current = null;
+      }
     };
 
     socket.on("room-created", handleRoomCreated);
@@ -75,7 +102,15 @@ export default function CreateCaseDossier() {
       socket.off("room-created", handleRoomCreated);
       socket.off("error", handleError);
     };
-  }, [router, detectiveName, playerId, updatePlayer, updateRoom, clearNotes]);
+  }, [router, detectiveName, playerId, updatePlayer, updateRoom, clearNotes, showColdStart]);
+
+  const handleTimeout = () => {
+    setShowColdStart(false);
+    setIsClassified(false);
+    setRoomReady(false);
+    coldStartTimerRef.current = null;
+    toast.error("Connection timed out. The server may be unavailable. Please try again.");
+  };
 
   const handleCreateCase = () => {
     if (!detectiveName.trim()) {
@@ -86,16 +121,34 @@ export default function CreateCaseDossier() {
       toast.error("Please select Maximum Investigators.");
       return;
     }
+
     setIsClassified(true);
+
+    // Always emit immediately — socket.io buffers the event
     socket.emit("create-room", {
       name: detectiveName.trim(),
       maxInvestigators: investigators,
       caseId: selectedCase.id,
       playerId,
     });
+
+    // Show the cold-start overlay only if room-created hasn't arrived in time.
+    // Warm server: room-created fires in <500ms → overlay never shows.
+    // Cold start: room-created takes ~30s → overlay shows after threshold.
+    coldStartTimerRef.current = setTimeout(() => {
+      coldStartTimerRef.current = null;
+      setShowColdStart(true);
+      setRoomReady(false);
+    }, COLD_START_THRESHOLD_MS);
   };
 
   return (
+    <>
+      <ColdStartOverlay
+        visible={showColdStart}
+        onTimeout={handleTimeout}
+        roomReady={roomReady}
+      />
     <div
       className="relative flex h-dvh items-start justify-center overflow-y-auto bg-[#0a0a0a] p-4 font-serif selection:bg-zinc-800 selection:text-white"
       data-lenis-prevent
@@ -294,5 +347,6 @@ export default function CreateCaseDossier() {
         </div>
       </div>
     </div>
+    </>
   );
 }
