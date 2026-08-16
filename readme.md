@@ -6,6 +6,10 @@ Inquest is a AI powered multiplayer murder mystery game where each player privat
 
 ![Interrogation Pipeline](./client/public/new-architecture.png)
 
+## Demo video
+
+https://github.com/user-attachments/assets/88cffe39-b759-41aa-bcaa-0799ea031565
+
 ## How the Interrogation Engine Works
 
 Every suspect reply is generated through a six-stage pipeline that runs per turn, per player:
