@@ -67,7 +67,6 @@ export default function RootLayout({
       lang="en"
       className={cn(
         "min-h-full",
-        "overflow-hidden",
         "antialiased",
         "dark",
         inter.variable,
@@ -77,7 +76,7 @@ export default function RootLayout({
         geist.variable,
       )}
     >
-      <body className="min-h-screen overflow-hidden flex flex-col bg-[#050505] text-white font-sans">
+      <body className="min-h-screen flex flex-col bg-[#050505] text-white font-sans">
         <MobileBlockerOverlay />
         <IntroOverlay />
         {children}
