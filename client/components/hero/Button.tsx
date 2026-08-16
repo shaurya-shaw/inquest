@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import HowToInvestigateModal from "./HowToInvestigateModal";
+import BloodPool from "./BloodPool";
 
 export default function Button() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -62,6 +63,13 @@ export default function Button() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
       />
+
+      {/* Hide blood pool while modal is open so it doesn't cover the modal */}
+      {!isModalOpen && (
+        <div className="fixed bottom-0 left-0 w-full pointer-events-none">
+          <BloodPool />
+        </div>
+      )}
     </>
   );
 }

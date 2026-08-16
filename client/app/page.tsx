@@ -1,7 +1,6 @@
 import Image from "next/image";
 import { Cinzel, Special_Elite } from "next/font/google";
 import BloodDrop from "@/components/hero/BloodDrop";
-import BloodPool from "@/components/hero/BloodPool";
 import Button from "@/components/hero/Button";
 import Knife from "@/components/hero/Knife";
 
@@ -85,11 +84,6 @@ export default function Home() {
           <Button />
         </div>
       </div>
-
-      {/* Embedded Dynamic Hero Module */}
-      <footer className="relative z-10 w-full mt-auto pointer-events-none">
-        <BloodPool />
-      </footer>
     </main>
   );
 }
