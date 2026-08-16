@@ -63,7 +63,7 @@ export default function Home() {
 
           {/* Main Title Group */}
           <div className="space-y-3 sm:space-y-4 mt-2 sm:mt-3">
-            <h1 className="font-cinzel font-black text-6xl sm:text-7xl md:text-7xl lg:text-7xl xl:text-[7.5rem] leading-none tracking-wider text-transparent bg-clip-text bg-linear-to-b from-gray-50 via-gray-200 to-gray-500 drop-shadow-[0_10px_15px_rgba(0,0,0,0.9)]">
+            <h1 className="font-cinzel font-black text-6xl sm:text-7xl md:text-7xl lg:text-7xl xl:text-[7rem] leading-none tracking-wider text-transparent bg-clip-text bg-linear-to-b from-gray-50 via-gray-200 to-gray-500 drop-shadow-[0_10px_15px_rgba(0,0,0,0.9)]">
               INQUEST
             </h1>
 
