@@ -426,13 +426,22 @@ export function registerInterrogationHandlers(
     }
 
     // ── Leak guard ───────────────────────────────────────────────────────
-    const finalResponse = await guardResponse(
+    const guardedResponse = await guardResponse(
       rawResponse,
       suspect,
       systemPrompt,
       playerMessage,
       generateSuspectResponse,
     );
+
+    // ── Strip stage directions (deterministic post-processing) ─────────────
+    // Removes asterisked actions (*pauses*, *glances away*), bracketed stage
+    // cues ([sighs], [quietly]), and leading/trailing whitespace artifacts.
+    const finalResponse = guardedResponse
+      .replace(/\*[^*]+\*/g, "")   // *action text*
+      .replace(/\[[^\]]+\]/g, "")  // [bracketed cues]
+      .replace(/\n{3,}/g, "\n\n")  // collapse excess blank lines
+      .trim();
 
     // ── Update session history ───────────────────────────────────────────
     session.messages.push({ role: "player", content: playerMessage });

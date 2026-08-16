@@ -104,6 +104,7 @@ export function assembleContext(
 
   // ── Final instruction ────────────────────────────────────────────────────
   lines.push(`\nRespond as ${suspect.name} only. Stay in character. Do not break the fourth wall. Do not acknowledge game mechanics.`);
+  lines.push(`OUTPUT FORMAT: Respond with spoken dialogue ONLY. Do NOT include any stage directions, action descriptions, narrator prose, or physical gestures (e.g. no "*pauses*", no "*glances away*", no italicized actions, no bracketed descriptions). Your entire response must be words ${suspect.name} would actually say out loud — nothing else.`);
 
   return lines.join("\n");
 }
