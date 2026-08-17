@@ -57,15 +57,18 @@ export default function IntroOverlay() {
         >
           <video
             ref={videoRef}
-            src="/intro-v2.mp4"
             autoPlay
             muted
             playsInline
+            preload="auto"
             controls={false}
             onEnded={handleFinish}
             onError={handleFinish}
             className="h-full w-full object-cover"
-          />
+          >
+            <source src="/intro-v3.webm" type="video/webm" />
+            <source src="/intro-v3.mp4" type="video/mp4" />
+          </video>
 
           {/* Skip Intro Button */}
           <button
